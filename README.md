@@ -1,6 +1,8 @@
-# Avalanche Deploy Assurance Website
+# Aegis - Avalanche Deploy Assurance Website
 
-Official website and documentation for the Avalanche Deploy Assurance project.
+Official website and documentation for the Aegis (Avalanche Deploy Assurance) project.
+
+**GitHub Repository:** https://github.com/Hermit210/Aegis-
 
 ## Tech Stack
 
@@ -71,9 +73,9 @@ components/
 
 ## Design System
 
-The site follows a premium, dark-mode design system with:
+The site follows a premium design system with:
 
-- **Colors:** Warm brown/bronze palette (#0F0E0D background, #C89A63 accent)
+- **Colors:** Dark brown background (#0A0501), golden brown accents (#D4AF8A), warm off-white text (#F5F1E8)
 - **Typography:** Inter (body), JetBrains Mono (code)
 - **Spacing:** 4px base unit (xs, sm, md, lg, xl, 2xl, 3xl, 4xl, 5xl, 6xl)
 - **Shadows:** Four-level shadow system for depth
@@ -131,4 +133,4 @@ MIT License - see LICENSE file for details
 
 ## Contact
 
-For questions or issues, please open a GitHub issue or email support@example.com
+For questions or issues, visit the GitHub repository at https://github.com/Hermit210/Aegis- or open a GitHub issue

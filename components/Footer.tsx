@@ -40,7 +40,7 @@ export function Footer() {
             <h4 className="text-text font-semibold mb-xl">Community</h4>
             <ul className="space-y-md text-accent">
               <li>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-highlight transition">
+                <a href="https://github.com/Hermit210/Aegis-" target="_blank" rel="noopener noreferrer" className="hover:text-highlight transition">
                   GitHub
                 </a>
               </li>

@@ -23,11 +23,11 @@ export function Header() {
             Security
           </Link>
           <a
-            href="https://github.com"
+            href="https://github.com/Hermit210/Aegis-"
             target="_blank"
             rel="noopener noreferrer"
             className="text-text hover:text-highlight"
-            aria-label="GitHub"
+            aria-label="GitHub Repository"
           >
             <Github size={20} />
           </a>
