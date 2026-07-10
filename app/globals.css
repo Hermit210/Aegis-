@@ -13,8 +13,8 @@ html {
 }
 
 body {
-  background-color: #ffffff;
-  color: #1a0f08;
+  background-color: #0a0501;
+  color: #f5f1e8;
   font-family: Inter, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -22,7 +22,7 @@ body {
 
 /* Focus visible for accessibility */
 *:focus-visible {
-  outline: 2px solid #2c1810;
+  outline: 2px solid #D4AF8A;
   outline-offset: 2px;
 }
 
@@ -97,12 +97,12 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3D2817;
+  background: #8B6F47;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2C1810;
+  background: #D4AF8A;
 }
 
 /* Reduce motion for users who prefer it */

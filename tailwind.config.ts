@@ -8,13 +8,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: '#FFFFFF',
-        card: '#F8F8F8',
-        surface: '#F0F0F0',
-        accent: '#3D2817',
-        highlight: '#2C1810',
-        border: '#E0D9D0',
-        text: '#1A0F08',
+        background: '#0A0501',
+        card: '#1A1410',
+        surface: '#2A1F17',
+        accent: '#8B6F47',
+        highlight: '#D4AF8A',
+        border: '#3D2F23',
+        text: '#F5F1E8',
         success: '#6B8E6B',
         warning: '#D4A574',
         error: '#A85D5D',
