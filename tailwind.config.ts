@@ -9,12 +9,12 @@ const config: Config = {
     extend: {
       colors: {
         background: '#FFFFFF',
-        card: '#9DB3D3',
+        card: '#E8F0F8',
         surface: '#3F1521',
         accent: '#3F1521',
         highlight: '#9DB3D3',
-        border: '#7A94B8',
-        text: '#3F1521',
+        border: '#9DB3D3',
+        text: '#1A0F0F',
         success: '#6B8E6B',
         warning: '#D4A574',
         error: '#A85D5D',
