@@ -1,185 +1,201 @@
 # Aegis
 
-Real-time deployment verification intelligence layer for Avalanche. Open source, public good, no token.
+# Aegis
 
-**GitHub Repository:** https://github.com/Hermit210/Aegis-
+**Deployment Verification & Assurance Toolkit for Avalanche L1 Builders**
 
-## What it does
+Aegis is an open-source, read-only diagnostics tool for Avalanche L1 builders. It sits between deployment and production, and answers one question every builder currently has to answer by hand: *does this deployment actually match what I configured?*
 
-Monitors every Avalanche L1 deployment and exposes a single answer: **is this deployment actually correct right now?**
+🌐 Landing page: [aegis-psi-dun.vercel.app](https://aegis-psi-dun.vercel.app)
+📄 License: MIT
+🚫 No token. No equity. No premine. Public good, open source from day one.
 
-Verifiers:
+---
 
-* Version compatibility (AvalancheGo, VM plugin alignment)
-* Configuration validation (local state consistency)
-* Port availability (binding conflicts detection)
-* Validator registration verification (live P-Chain sync check)
-* Network state verification (RPC health, chain reachability)
-* Genesis consistency (on-chain vs local genesis match)
+## The Problem
 
-Outputs:
+Avalanche provides strong tooling for deploying an L1 (`avalanche-cli`), provisioning infrastructure, and monitoring live nodes and validators. What's missing is a layer that verifies, independently, whether a specific deployment actually succeeded — not whether the CLI reported success, but whether the resulting chain matches what was configured.
 
-* CLI tool with human-readable reports
-* JSON API (for CI/CD pipelines)
-* Health score (0.0-1.0 confidence metric)
-* Actionable remediation guidance per check
-* GitHub Actions integration template
-* WebSocket API (planned)
-* On-chain oracle (planned)
+Today, confirming that is a manual process:
+
+- A deployment can report success while validator registration, network state, or configuration still silently disagree with what was intended.
+- Validators have to be manually re-checked against live network state, with no automated confirmation step.
+- Version and configuration mistakes usually surface *after* deployment, not before.
+- Debugging means manually cross-referencing CLI output, RPC responses, validator sets, and logs — with no single source of truth.
+- There's no unified confidence signal a builder can point to, and no guided fix when something's wrong.
+
+## The Solution
+
+Aegis closes that gap with a read-only CLI that runs in three stages:
+
+1. **Pre-flight** — checks version compatibility, configuration resolution, and port availability *before* a deployment is attempted.
+2. **Post-deploy verification** — independently re-reads live RPC and P-Chain state and compares it against configured intent, rather than trusting any tool's self-reported status.
+3. **Reporting** — one health-scored report with clear pass/warning/error results and a concrete fix for every issue found.
+
+### Verification Modules (Planned CLI — see Status below)
+
+| Module | What it checks |
+|---|---|
+| Version Compatibility | AvalancheGo and VM plugin version alignment |
+| Configuration Validation | Local config resolution, ambiguity detection |
+| Port Availability | Binding conflicts before deployment |
+| Validator Verification | Configured validator set vs. live P-Chain state |
+| Network State Verification | RPC health and reachability vs. CLI-reported status |
+| Genesis Consistency | On-chain genesis vs. local genesis file |
+
+### Output
+
+- Human-readable terminal reports
+- JSON output with a documented schema (for CI/CD pipelines)
+- Health score (0.0–1.0) alongside raw pass/warning/error counts — never as a replacement for them
+- Plain-language, actionable fix for every non-passing check
+- CI integration examples (GitHub Actions)
+
+## What Aegis Does *Not* Do
+
+Aegis is strictly read-only, by architecture, not convention:
+
+- ❌ No private key handling
+- ❌ No transaction signing or submission
+- ❌ No writes to chain state
+- ❌ No writes to `avalanche-cli` or any other tool's configuration
+- ❌ No on-chain component of any kind — Aegis has no contract, no program, and nothing to "deploy" to mainnet or testnet; it is a local CLI that reads public data
+
+The worst-case failure mode of a bug in Aegis is an inaccurate report — never fund loss or an unauthorized on-chain action.
 
 ## Status
 
-v1.0 shipped. Production-ready. Grant application in progress with Avalanche Foundation ($5,000, 12-week build).
+**Current:** This repository presently contains the project's landing page and documentation site (Next.js/TypeScript) — [aegis-psi-dun.vercel.app](https://aegis-psi-dun.vercel.app) — covering the problem statement, architecture, and security model. **The Go-based CLI and its verification engine are in active development and have not shipped yet.**
 
-## Quick start
+**Funding:** Applying for a Team1 Mini Grant ($6,500 USD, 8-week build) to fund development of the CLI through a public v1.0 release. Full proposal available on request.
 
+**Why this is scoped as an 8-week, $6,500 build:** the MVP is deliberately narrow — six verification checks, terminal and JSON reporting, and CI examples — see [Roadmap](#roadmap) below for exactly what's in and out of v1.
+
+## Why This Project Exists
+
+`avalanche-cli` — the primary deployment tool most Avalanche L1 builders use — entered a maintenance-focused posture: the maintaining team is prioritizing security and critical fixes over new feature development, and has explicitly welcomed external contributions to close remaining gaps. Aegis is scoped specifically to fill one of those gaps: independent deployment verification.
+
+This isn't a duplicate of existing tooling:
+
+| Layer | Existing tool | Aegis |
+|---|---|---|
+| Deployment execution | `avalanche-cli` | Verifies what it reports — never deploys anything itself |
+| Infrastructure provisioning | `avalanche-deploy`, `avalanche-network-runner` | Operates one layer up, after infra/network is already running |
+| Ongoing monitoring | `avalanche-monitoring`, explorer-based dashboards | One-time, point-in-time deployment check — not continuous monitoring |
+
+## Roadmap
+
+### v1 (MVP — funded by this grant, if approved)
+- All 6 verification modules listed above
+- Terminal and JSON reporting with a documented, versioned schema
+- Health score (v1 formula, explicitly labeled provisional)
+- Local network + Fuji testnet support
+- CI integration examples
+
+### Explicitly out of scope for v1
+- No daemon or continuous monitoring mode
+- No automated repair or transaction signing
+- No support for non-CLI deployment workflows
+- No hosted API or web dashboard beyond this landing page
+- No AI-generated remediation suggestions
+
+### Future (v2+, contingent on real usage evidence — not committed)
+- Weighted, evidence-based health scoring
+- Markdown report output
+- Community-contributed verification modules
+- Optional local-only API + richer web viewer for reports
+- Exploration of deployment workflows beyond the standard CLI path
+
+## Tech Stack
+
+**Landing page (this repo, current):**
+- Next.js 14 (React 18), TypeScript
+- Tailwind CSS, Framer Motion, Lucide React
+
+**CLI (in development, separate build):**
+- Go — matches `avalanche-cli`, `avalanchego`, and `hypersdk`; compiles to a single static binary with no runtime dependency
+- Cobra — same CLI framework `avalanche-cli` itself uses
+
+## Development (Landing Page)
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+
+### Setup
 ```bash
 npm install
 npm run dev
 ```
+Open [http://localhost:3001](http://localhost:3001).
 
-Open [http://localhost:3001](http://localhost:3001). See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full dev loop and [START_HERE.md](./START_HERE.md) for quick setup.
+### Build for production
+```bash
+npm run build
+npm start
+```
 
-## Tech Stack
+### Type checking & linting
+```bash
+npm run type-check
+npm run lint
+```
 
-- **Framework:** Next.js 14 (React 18)
-- **Styling:** Tailwind CSS
-- **Animations:** Framer Motion
-- **Icons:** Lucide React
-- **Language:** TypeScript
-- **Build Tool:** TypeScript compiler
-- **Package Manager:** npm
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full dev workflow.
 
-## Why
-
-Over 50+ failed or misconfigured Avalanche L1 deployments reported in 2024. Most issues emit detectable signals — configuration mismatches, version incompatibilities, validator registration failures, network connectivity issues — minutes to hours before they cause real problems. No public, real-time, neutral, Avalanche-focused service aggregates them today.
-
-Builders currently spend 2-4 hours debugging deployments manually. Aegis reduces that to 60 seconds.
-
-## Architecture
+## Architecture (Landing Page)
 
 ```
 app/
 ├── layout.tsx           # Root layout
-├── page.tsx            # Homepage
-├── globals.css         # Global styles
-├── docs/
-│   └── page.tsx       # Documentation page
-├── architecture/
-│   └── page.tsx       # Architecture & Contributing
-└── security/
-    └── page.tsx       # Security & Trust
+├── page.tsx             # Homepage
+├── globals.css          # Global styles
+├── docs/page.tsx         # Documentation page
+├── architecture/page.tsx # Architecture & Contributing
+└── security/page.tsx     # Security & Trust
 
 components/
-├── Header.tsx         # Navigation header
-├── Footer.tsx         # Footer
-├── Hero.tsx          # Hero section
-├── TheGap.tsx        # Problem statement section
-├── HowItWorks.tsx    # Three-stage flow section
-├── Features.tsx      # Feature cards section
-├── GettingStarted.tsx # Installation section
-└── Button.tsx        # Reusable button component
+├── Header.tsx
+├── Footer.tsx
+├── Hero.tsx
+├── TheGap.tsx            # Problem statement section
+├── HowItWorks.tsx        # Three-stage flow section
+├── Features.tsx
+├── GettingStarted.tsx
+└── Button.tsx
 ```
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the complete design and [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) for engineering details.
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full design writeup, including the planned CLI's internal architecture (state layer, check layer, report layer).
 
-## Development
+## Deployment (Landing Page)
 
-### Prerequisites
+- **Vercel** (recommended): `vercel deploy`
+- **Docker**: `docker build -t aegis . && docker run -p 3000:3000 aegis`
+- **Node.js host**: any standard Node hosting (AWS, GCP, Azure, etc.)
 
-- Node.js 18+
-- npm or yarn
+## Security
 
-### Installation
+Full threat model and false-positive/negative handling documented in [`/security`](https://aegis-psi-dun.vercel.app/security) on the landing page. In short: Aegis is read-only by architecture — there is no code path that handles keys, signs transactions, or writes to chain state or external configuration.
 
-```bash
-npm install
-```
+## Contributing
 
-### Development Server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3001](http://localhost:3001) to view the site.
-
-### Build for Production
-
-```bash
-npm run build
-npm start
-```
-
-### Type Checking
-
-```bash
-npm run type-check
-```
-
-### Linting
-
-```bash
-npm run lint
-```
-
-## Design System
-
-The site follows a premium design system with:
-
-- **Colors:** Dark brown background (#0A0501), golden brown accents (#D4AF8A), warm off-white text (#F5F1E8)
-- **Typography:** Inter (body), JetBrains Mono (code)
-- **Spacing:** 4px base unit (xs, sm, md, lg, xl, 2xl, 3xl, 4xl, 5xl, 6xl)
-- **Shadows:** Four-level shadow system for depth
-- **Animations:** Framer Motion with cubic-bezier easing
-
-### Key Features
-
-- Fully responsive (mobile, tablet, desktop)
-- Premium dark mode aesthetic
-- Accessible (WCAG AA+, keyboard navigation, semantic HTML)
-- Performance optimized (Lighthouse 90+)
-- Copy-to-clipboard code blocks
-- Smooth scroll animations
-
-## Pages
-
-1. **Homepage** (`/`) - Product overview, problem statement, verification flow, features, installation
-2. **Docs** (`/docs`) - Quick install, first run, understanding reports, all six checks, CI/CD integration
-3. **Architecture** (`/architecture`) - Design philosophy, check interface, project structure, contributing guide
-4. **Security** (`/security`) - Trust model, threat analysis, safe defaults, open-source transparency
-
-## Deployment
-
-The site is production-ready and can be deployed to:
-
-- **Vercel** (recommended, zero-config) — `vercel deploy`
-- **Docker** — `docker build -t aegis . && docker run -p 3000:3000 aegis`
-- **Node.js host** — AWS, GCP, Azure, Heroku, etc.
-
-### Deploy to Vercel
-
-```bash
-vercel deploy
-```
-
-### Deploy with Docker
-
-```bash
-docker build -t aegis .
-docker run -p 3000:3000 aegis
-```
-
-### Deploy to Node.js Host
-
-```bash
-npm run build
-npm start
-```
+Contributions welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md). Once the CLI ships, the primary contribution surface will be adding new verification checks via a documented, self-contained interface.
 
 ## License
 
-MIT (code), CC-BY 4.0 (docs). No token, no equity, no premine. Built by: Khan Saloni ([@Hermit210](https://github.com/Hermit210))
+MIT (code) · CC-BY 4.0 (docs)
+
+Built by [Saloni](https://github.com/Hermit210) ([@Saloniii0987](https://x.com/Saloniii0987))
+
+## Links
+
+- Landing page: [aegis-psi-dun.vercel.app](https://aegis-psi-dun.vercel.app)
+- GitHub: [github.com/Hermit210/Aegis-](https://github.com/Hermit210/Aegis-)
+- Portfolio: [salonicom.vercel.app](https://salonicom.vercel.app)
+
+## Contact
+
+Questions or feedback — open a GitHub issue on this repository.
 
 ## Contact & Community
 
