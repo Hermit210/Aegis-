@@ -185,7 +185,3 @@ MIT (code), CC-BY 4.0 (docs). No token, no equity, no premine. Built by: Khan Sa
 
 For questions or issues, visit the GitHub repository at [https://github.com/Hermit210/Aegis-](https://github.com/Hermit210/Aegis-) or open a GitHub issue.
 
-## Mainnet Deployment
-
-- **Contract Address:** TBD (Devnet: `6148M4aXYbDsscWn14zCazPy9V4fQFGozdDQp4LFmqHM`)
-- **Status:** Beta (Fuji Testnet, public testing)
