@@ -6,9 +6,11 @@
 
 Aegis is an open-source, read-only diagnostics tool for Avalanche L1 builders. It sits between deployment and production, and answers one question every builder currently has to answer by hand: *does this deployment actually match what I configured?*
 
-🌐 Landing page: [aegis-psi-dun.vercel.app](https://aegis-psi-dun.vercel.app)
-📄 License: MIT
-🚫 No token. No equity. No premine. Public good, open source from day one.
+#🌐 Landing page: [aegis-psi-dun.vercel.app](https://aegis-psi-dun.vercel.app)
+
+#📄 License: MIT
+
+#🚫 No token. No equity. No premine. Public good, open source from day one.
 
 ---
 
