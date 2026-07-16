@@ -187,11 +187,8 @@ MIT (code) · CC-BY 4.0 (docs)
 
 Built by [Saloni](https://github.com/Hermit210) ([@Saloniii0987](https://x.com/Saloniii0987))
 
-## Links
 
-- Landing page: [aegis-psi-dun.vercel.app](https://aegis-psi-dun.vercel.app)
-- GitHub: [github.com/Hermit210/Aegis-](https://github.com/Hermit210/Aegis-)
-- Portfolio: [salonicom.vercel.app](https://salonicom.vercel.app)
+
 
 ## Contact
 
