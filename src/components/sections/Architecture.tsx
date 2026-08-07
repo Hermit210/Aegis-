@@ -9,25 +9,33 @@ export default function Architecture() {
       name: 'CLI Layer',
       icon: GitBranch,
       items: ['cobra commands', 'Flag parsing', 'Error handling'],
-      color: 'from-primary to-secondary',
+      accent: 'border-l-primary',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
     {
       name: 'Checks Engine',
       icon: CheckCircle2,
       items: ['Pre-flight checks', 'Post-deploy checks', 'Result aggregation'],
-      color: 'from-secondary to-highlight',
+      accent: 'border-l-secondary',
+      iconBg: 'bg-secondary/10',
+      iconColor: 'text-secondary',
     },
     {
       name: 'State Readers',
       icon: Database,
       items: ['CLI config parser', 'RPC client', 'P-Chain client'],
-      color: 'from-highlight to-primary',
+      accent: 'border-l-highlight',
+      iconBg: 'bg-highlight/10',
+      iconColor: 'text-highlight',
     },
     {
       name: 'Report Generator',
       icon: Network,
       items: ['Health scoring', 'Text output', 'JSON output'],
-      color: 'from-primary to-secondary',
+      accent: 'border-l-primary',
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
     },
   ]
 
@@ -64,28 +72,26 @@ export default function Architecture() {
                 {/* Layer Box */}
                 <div
                   className={`
-                    relative overflow-hidden rounded-xl border border-border p-6 transition
-                    hover:border-primary cursor-pointer
-                    bg-gradient-to-r ${layer.color} via-background to-background
+                    relative overflow-hidden rounded-xl border border-border border-l-4 ${layer.accent}
+                    bg-card p-6 transition cursor-pointer
+                    hover:shadow-lg hover:-translate-y-0.5
                   `}
-                  style={{
-                    backgroundImage: `linear-gradient(90deg, rgba(139, 94, 60, 0.05) 0%, rgba(10, 10, 10, 0.8) 100%)`,
-                  }}
                 >
                   {/* Glow on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500">
                     <div
                       className="absolute inset-0 rounded-xl blur-2xl"
                       style={{
-                        background: 'radial-gradient(circle at 50% 50%, rgba(139, 94, 60, 0.3) 0%, transparent 70%)',
+                        background:
+                          'radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--primary) 20%, transparent) 0%, transparent 70%)',
                       }}
                     />
                   </div>
 
                   {/* Content */}
                   <div className="relative z-10 flex items-center gap-6">
-                    <div className="p-4 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition">
-                      <Icon className="w-8 h-8 text-primary group-hover:text-secondary transition" />
+                    <div className={`p-4 ${layer.iconBg} rounded-lg group-hover:scale-105 transition`}>
+                      <Icon className={`w-8 h-8 ${layer.iconColor}`} />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition">

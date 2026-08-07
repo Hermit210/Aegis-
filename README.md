@@ -1,36 +1,183 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Avalanche Deploy Assurance
+
+**Independent, read-only verification for `avalanche-cli` deployments.**
+
+`avalanche-cli` can report a deployment as successful while the underlying chain
+disagrees — validators that were "added" don't show up in the validator set,
+config files get silently ignored, ports get reassigned after an upgrade. This
+site makes the case for a verification layer that never trusts a tool's own
+status report: it independently re-reads on-chain and RPC state and diffs it
+against what was actually configured.
+
+This repository is the marketing/demo site for that idea — a Next.js app that
+explains the problem, walks through the proposed three-stage verification flow
+(pre-flight → deploy → post-deploy verify), and includes an interactive,
+simulated dashboard so the workflow is easy to picture before the underlying
+CLI tool exists.
+
+## Table of Contents
+
+- [The Problem](#the-problem)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Available Scripts](#available-scripts)
+- [Project Structure](#project-structure)
+- [Design System](#design-system)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
+
+## The Problem
+
+Four documented `avalanche-cli` issues drive the site's messaging:
+
+| Issue | Problem | Impact |
+|---|---|---|
+| [#2594](https://github.com/ava-labs/avalanche-cli/issues/2594) | CLI reports deploy success while local network status disagrees | Chain appears broken when it isn't, or vice versa |
+| [#2526](https://github.com/ava-labs/avalanche-cli/issues/2526) | `addValidator` transaction succeeds but the validator set query comes back empty | Fees charged, validator never actually added |
+| [#2535](https://github.com/ava-labs/avalanche-cli/issues/2535) | `config.json` silently ignored, ports randomize after the Etna upgrade | Port mismatch, clients can't reconnect |
+| [#2458](https://github.com/ava-labs/avalanche-cli/issues/2458) | A Ledger signature failure forces a full re-run and re-charges subnet fees | Builder loses funds with no recovery path |
+
+The proposed fix is a **read-only, three-stage verification layer**:
+
+1. **Pre-flight** — checks version compatibility, config resolution, and port
+   availability before a deployment is attempted.
+2. **Deploy** — your standard `avalanche-cli` commands, unmodified.
+3. **Post-deploy verify** — independently re-reads live RPC and P-Chain state
+   and diffs it against configured intent, rather than trusting any tool's
+   self-reported status.
+
+## Tech Stack
+
+- [Next.js 16](https://nextjs.org) (App Router, Turbopack)
+- [React 19](https://react.dev)
+- [TypeScript](https://www.typescriptlang.org)
+- [Tailwind CSS v4](https://tailwindcss.com)
+- [Framer Motion](https://www.framer.com/motion) for animation
+- [Lucide React](https://lucide.dev) for icons
 
 ## Getting Started
 
-First, run the development server:
+**Prerequisites:** Node.js 18+ and npm 9+.
 
 ```bash
+git clone https://github.com/Hermit210/Aegis-.git
+cd Aegis-
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). The page hot-reloads as
+you edit files under `src/`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the dev server with hot reload (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Run ESLint |
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/
+│   ├── page.tsx          # Homepage — composes all sections
+│   ├── layout.tsx        # Root layout, metadata
+│   └── globals.css       # Design tokens (colors, base styles)
+└── components/
+    ├── Navigation.tsx    # Sticky header
+    ├── Footer.tsx        # Footer with links
+    └── sections/
+        ├── Hero.tsx           # Headline + animated terminal preview
+        ├── Problem.tsx        # The four GitHub issues above
+        ├── Solution.tsx       # Before/after workflow comparison
+        ├── Features.tsx       # Capability grid
+        ├── Demo.tsx           # Interactive simulated verification run
+        ├── Architecture.tsx   # Four-layer system design
+        ├── Roadmap.tsx        # Delivery timeline
+        ├── OpenSource.tsx     # OSS commitments, how to contribute
+        └── CTA.tsx            # Install commands, final call to action
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Design System
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Colors are defined once as CSS custom properties in `src/app/globals.css` and
+consumed everywhere through Tailwind's `@theme inline` mapping — change a
+value there and it propagates across the whole site.
 
-## Deploy on Vercel
+**Bold White & Maroon**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Token | Value | Use |
+|---|---|---|
+| `--background` | `#FFFFFF` | Page background |
+| `--surface` | `#FBF5F6` | Alternating section background |
+| `--card` | `#FFFFFF` | Card backgrounds |
+| `--primary` | `#7A0C22` | Brand color — buttons, links, accents |
+| `--secondary` | `#A11930` | Hover states, gradient partner |
+| `--highlight` | `#D4183D` | Emphasis text, code accents |
+| `--foreground` | `#1A1214` | Primary text |
+| `--text-secondary` | `#55424A` | Secondary text |
+| `--text-tertiary` | `#93797D` | Meta/tertiary text |
+| `--border` | `#E9DEE0` | Borders and dividers |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Semantic colors (`--success`, `--warning`, `--error`, `--info`) are defined
+separately and kept distinct from the brand palette so status messaging stays
+unambiguous.
+
+> **Note on the reset rule:** the global `* { margin: 0; padding: 0; }` reset
+> in `globals.css` lives inside `@layer base`. Per the CSS Cascade Layers
+> spec, an *unlayered* rule would silently beat every Tailwind utility
+> (`px-*`, `py-*`, etc.) regardless of specificity — keep it layered if you
+> touch this file.
+
+## Deployment
+
+### Vercel (recommended)
+
+```bash
+vercel deploy
+```
+
+Or connect this repository to Vercel for automatic deployments on push to `main`.
+
+### Self-hosted
+
+```bash
+npm run build
+npm run start
+```
+
+### Docker
+
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "run", "start"]
+```
+
+## Contributing
+
+This is a frontend-only site — there's no backend and no real CLI in this
+repository yet, so most contributions will be to copy, design, or new
+sections. To propose a change:
+
+1. Fork the repo and create a branch.
+2. Keep changes to the design system flowing through the CSS tokens in
+   `globals.css` rather than hardcoding colors in components.
+3. Run `npm run lint` before opening a PR.
+4. Open a PR describing what changed and why.
+
+## License
+
+[MIT](./LICENSE) — permissive, no strings attached.
+
+---
+
+Built for the Avalanche L1 builder community.
