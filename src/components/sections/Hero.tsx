@@ -51,7 +51,7 @@ export default function Hero() {
                 Try Demo <ArrowRight className="w-4 h-4" />
               </motion.button>
             </Link>
-            <Link href="#problems">
+            <Link href="/problem">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

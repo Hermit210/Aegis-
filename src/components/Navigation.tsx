@@ -8,12 +8,12 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
 
   const links = [
-    { href: '#problems', label: 'Problem' },
-    { href: '#solution', label: 'Solution' },
-    { href: '#features', label: 'Features' },
-    { href: '#architecture', label: 'Architecture' },
-    { href: '#opensource', label: 'Docs' },
-    { href: '#roadmap', label: 'Roadmap' },
+    { href: '/problem', label: 'Problem' },
+    { href: '/solution', label: 'Solution' },
+    { href: '/features', label: 'Features' },
+    { href: '/architecture', label: 'Architecture' },
+    { href: '/docs', label: 'Docs' },
+    { href: '/roadmap', label: 'Roadmap' },
   ]
 
   return (
@@ -33,13 +33,13 @@ export default function Navigation() {
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
             {links.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 className="text-text-secondary hover:text-primary transition text-sm"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -68,14 +68,14 @@ export default function Navigation() {
         {isOpen && (
           <div className="md:hidden mt-4 pt-4 border-t border-border space-y-3">
             {links.map((link) => (
-              <a
+              <Link
                 key={link.href}
                 href={link.href}
                 className="block text-text-secondary hover:text-primary transition text-sm py-2"
                 onClick={() => setIsOpen(false)}
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
             <a
               href="https://github.com/Hermit210/Aegis-"

@@ -81,24 +81,34 @@ you edit files under `src/`.
 
 ## Project Structure
 
+Each nav item is its own route — the homepage is a focused landing page
+(Hero, interactive demo, CTA), and the Problem/Solution/Features/
+Architecture/Docs/Roadmap content each live on their own page.
+
 ```
 src/
 ├── app/
-│   ├── page.tsx          # Homepage — composes all sections
+│   ├── page.tsx          # Homepage — Hero + Demo + CTA
 │   ├── layout.tsx        # Root layout, metadata
-│   └── globals.css       # Design tokens (colors, base styles)
+│   ├── globals.css       # Design tokens (colors, base styles)
+│   ├── problem/page.tsx
+│   ├── solution/page.tsx
+│   ├── features/page.tsx
+│   ├── architecture/page.tsx
+│   ├── docs/page.tsx
+│   └── roadmap/page.tsx
 └── components/
     ├── Navigation.tsx    # Sticky header
     ├── Footer.tsx        # Footer with links
     └── sections/
         ├── Hero.tsx           # Headline + animated terminal preview
-        ├── Problem.tsx        # The four GitHub issues above
-        ├── Solution.tsx       # Before/after workflow comparison
-        ├── Features.tsx       # Capability grid
-        ├── Demo.tsx           # Interactive simulated verification run
-        ├── Architecture.tsx   # Four-layer system design
-        ├── Roadmap.tsx        # Delivery timeline
-        ├── OpenSource.tsx     # OSS commitments, how to contribute
+        ├── Problem.tsx        # The four GitHub issues above — /problem
+        ├── Solution.tsx       # Before/after workflow comparison — /solution
+        ├── Features.tsx       # Capability grid — /features
+        ├── Demo.tsx           # Interactive simulated verification run — on homepage
+        ├── Architecture.tsx   # Four-layer system design — /architecture
+        ├── Roadmap.tsx        # Delivery timeline — /roadmap
+        ├── OpenSource.tsx     # OSS commitments, how to contribute — /docs
         └── CTA.tsx            # Install commands, final call to action
 ```
 

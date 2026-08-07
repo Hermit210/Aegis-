@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { GitBranch, MessageCircle, FileText } from 'lucide-react'
 
 export default function Footer() {
@@ -25,19 +26,19 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2 text-sm text-text-secondary">
               <li>
-                <a href="#features" className="hover:text-primary transition">
+                <Link href="/features" className="hover:text-primary transition">
                   Features
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#docs" className="hover:text-primary transition">
+                <Link href="/docs" className="hover:text-primary transition">
                   Documentation
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#roadmap" className="hover:text-primary transition">
+                <Link href="/roadmap" className="hover:text-primary transition">
                   Roadmap
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="https://github.com/Hermit210/Aegis-/releases" className="hover:text-primary transition">
