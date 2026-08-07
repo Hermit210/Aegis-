@@ -8,11 +8,11 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
 
   const links = [
-    { href: '#problem', label: 'Problem' },
+    { href: '#problems', label: 'Problem' },
     { href: '#solution', label: 'Solution' },
     { href: '#features', label: 'Features' },
     { href: '#architecture', label: 'Architecture' },
-    { href: '#docs', label: 'Docs' },
+    { href: '#opensource', label: 'Docs' },
     { href: '#roadmap', label: 'Roadmap' },
   ]
 
@@ -46,7 +46,7 @@ export default function Navigation() {
           {/* CTA & Mobile Menu */}
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com/your-org/avalanche-deploy-assurance"
+              href="https://github.com/Hermit210/Aegis-"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-primary text-background rounded-lg font-medium text-sm hover:bg-secondary transition"
@@ -78,7 +78,7 @@ export default function Navigation() {
               </a>
             ))}
             <a
-              href="https://github.com/your-org/avalanche-deploy-assurance"
+              href="https://github.com/Hermit210/Aegis-"
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full px-4 py-2 bg-primary text-background rounded-lg font-medium text-sm hover:bg-secondary transition text-center mt-4"

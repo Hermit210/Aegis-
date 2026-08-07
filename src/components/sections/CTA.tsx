@@ -28,7 +28,7 @@ export default function CTA() {
             <div className="bg-card border border-border rounded-xl p-6 text-left">
               <p className="text-xs text-text-secondary font-mono mb-3">via go install</p>
               <code className="text-sm text-highlight font-mono break-all">
-                go install github.com/your-org/...@latest
+                go install github.com/Hermit210/Aegis-/...@latest
               </code>
             </div>
             <div className="bg-card border border-border rounded-xl p-6 text-left">
@@ -42,7 +42,7 @@ export default function CTA() {
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <a
-              href="https://github.com/your-org/avalanche-deploy-assurance"
+              href="https://github.com/Hermit210/Aegis-"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-8 py-4 bg-gradient-bronze text-background font-semibold rounded-lg hover:shadow-bronze-glow-lg transition group"

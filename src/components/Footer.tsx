@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { GitBranch, MessageCircle, FileText } from 'lucide-react'
 
 export default function Footer() {
@@ -41,7 +40,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="https://github.com/your-org/avalanche-deploy-assurance/releases" className="hover:text-primary transition">
+                <a href="https://github.com/Hermit210/Aegis-/releases" className="hover:text-primary transition">
                   Releases
                 </a>
               </li>
@@ -53,22 +52,22 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-sm text-text-secondary">
               <li>
-                <a href="https://github.com/your-org/avalanche-deploy-assurance" className="hover:text-primary transition">
+                <a href="https://github.com/Hermit210/Aegis-" className="hover:text-primary transition">
                   GitHub
                 </a>
               </li>
               <li>
-                <a href="https://github.com/your-org/avalanche-deploy-assurance/issues" className="hover:text-primary transition">
+                <a href="https://github.com/Hermit210/Aegis-/issues" className="hover:text-primary transition">
                   Issues
                 </a>
               </li>
               <li>
-                <a href="https://github.com/your-org/avalanche-deploy-assurance#contributing" className="hover:text-primary transition">
+                <a href="https://github.com/Hermit210/Aegis-#contributing" className="hover:text-primary transition">
                   Contributing
                 </a>
               </li>
               <li>
-                <a href="https://github.com/your-org/avalanche-deploy-assurance/blob/main/LICENSE" className="hover:text-primary transition">
+                <a href="https://github.com/Hermit210/Aegis-/blob/main/LICENSE" className="hover:text-primary transition">
                   License (MIT)
                 </a>
               </li>
@@ -80,7 +79,7 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Connect</h4>
             <div className="flex gap-3">
               <a
-                href="https://github.com/your-org/avalanche-deploy-assurance"
+                href="https://github.com/Hermit210/Aegis-"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-card rounded-lg flex items-center justify-center hover:bg-primary hover:text-background transition"
@@ -96,7 +95,7 @@ export default function Footer() {
                 <MessageCircle size={20} />
               </a>
               <a
-                href="https://github.com/your-org/avalanche-deploy-assurance/blob/main/README.md"
+                href="https://github.com/Hermit210/Aegis-/blob/main/README.md"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-card rounded-lg flex items-center justify-center hover:bg-primary hover:text-background transition"

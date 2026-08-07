@@ -47,12 +47,22 @@
   --font-mono: 'Fira Code', 'Courier New', monospace;
 }
 
-* {
-  @apply m-0 p-0 box-border;
+@layer base {
+  * {
+    @apply m-0 p-0 box-border;
+  }
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+@layer base {
+  /* Matches the sticky nav's measured height (69px) plus a small buffer,
+     so anchor-jumped section headings clear it instead of rendering underneath it. */
+  section[id] {
+    scroll-margin-top: 4.5rem;
+  }
 }
 
 body {
