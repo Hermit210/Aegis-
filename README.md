@@ -108,20 +108,20 @@ Colors are defined once as CSS custom properties in `src/app/globals.css` and
 consumed everywhere through Tailwind's `@theme inline` mapping — change a
 value there and it propagates across the whole site.
 
-**Bold White & Maroon**
+**Bold Black & Maroon**
 
 | Token | Value | Use |
 |---|---|---|
-| `--background` | `#FFFFFF` | Page background |
-| `--surface` | `#FBF5F6` | Alternating section background |
-| `--card` | `#FFFFFF` | Card backgrounds |
-| `--primary` | `#7A0C22` | Brand color — buttons, links, accents |
-| `--secondary` | `#A11930` | Hover states, gradient partner |
-| `--highlight` | `#D4183D` | Emphasis text, code accents |
-| `--foreground` | `#1A1214` | Primary text |
-| `--text-secondary` | `#55424A` | Secondary text |
-| `--text-tertiary` | `#93797D` | Meta/tertiary text |
-| `--border` | `#E9DEE0` | Borders and dividers |
+| `--background` | `#0A0808` | Page background |
+| `--surface` | `#150F10` | Alternating section background |
+| `--card` | `#1E1516` | Card backgrounds |
+| `--primary` | `#9E1B32` | Brand color — buttons, links, accents |
+| `--secondary` | `#C4283F` | Hover states, gradient partner |
+| `--highlight` | `#FF4667` | Emphasis text, code accents |
+| `--foreground` | `#F5EDEE` | Primary text |
+| `--text-secondary` | `#C9B8BB` | Secondary text |
+| `--text-tertiary` | `#8F7A7D` | Meta/tertiary text |
+| `--border` | `#2E2225` | Borders and dividers |
 
 Semantic colors (`--success`, `--warning`, `--error`, `--info`) are defined
 separately and kept distinct from the brand palette so status messaging stays
