@@ -51,6 +51,25 @@ export async function callJsonRpc<T>(
   return body.result
 }
 
+/** GETs and parses JSON from a REST-style endpoint (e.g. the Health API, which isn't JSON-RPC). */
+export async function fetchJson<T>(url: string): Promise<{ status: number; body: T }> {
+  let response: Response
+  try {
+    response = await fetch(url)
+  } catch (err) {
+    throw new AvalancheRpcError(`Could not reach ${url}: ${(err as Error).message}`, { cause: err })
+  }
+
+  let body: T
+  try {
+    body = (await response.json()) as T
+  } catch (err) {
+    throw new AvalancheRpcError(`${url} did not return valid JSON: ${(err as Error).message}`, { cause: err })
+  }
+
+  return { status: response.status, body }
+}
+
 /** P-Chain is public on Avalanche's API servers, unlike Info/Health/Admin. */
 export const PUBLIC_P_CHAIN_URL: Record<'mainnet' | 'fuji', string> = {
   mainnet: 'https://api.avax.network/ext/bc/P',
