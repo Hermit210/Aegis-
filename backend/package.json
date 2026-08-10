@@ -1,0 +1,33 @@
+{
+  "name": "@aegis/backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Real-time deployment verification engine for Avalanche L1s: six independent checks, a health score, a CLI, and a JSON API.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "aegis": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev:cli": "tsx src/cli/index.ts",
+    "dev:api": "tsx src/api/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@avalabs/avalanchejs": "^5.0.0",
+    "commander": "^13.0.0",
+    "fastify": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
