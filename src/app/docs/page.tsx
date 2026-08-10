@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import ChecksBreakdown from '@/components/sections/ChecksBreakdown'
 import OpenSource from '@/components/sections/OpenSource'
 
 export const metadata: Metadata = {
@@ -7,5 +8,10 @@ export const metadata: Metadata = {
 }
 
 export default function DocsPage() {
-  return <OpenSource />
+  return (
+    <>
+      <ChecksBreakdown />
+      <OpenSource />
+    </>
+  )
 }

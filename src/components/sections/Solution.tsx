@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { ArrowDown, CheckCircle2, AlertCircle, Zap } from 'lucide-react'
 import { useGsapReveal } from '@/lib/useGsapReveal'
+import { checkStages } from '@/lib/checks'
 
 export default function Solution() {
   const stagesRef = useGsapReveal<HTMLDivElement>({ selector: '.reveal-stage', y: 30, stagger: 0.12 })
@@ -103,22 +104,19 @@ export default function Solution() {
         <div ref={stagesRef} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
           {[
             {
-              title: 'Pre-Flight',
+              title: checkStages[0].title,
               description: 'Before deploy is attempted',
-              checks: ['AvalancheGo ↔ VM compatibility', 'Config resolution', 'Port availability'],
-              icon: 'preflight',
+              checks: checkStages[0].checks.map((c) => c.name),
             },
             {
               title: 'Deploy',
               description: 'Run your standard CLI commands',
               checks: ['avalanche blockchain deploy', 'All existing flows work', 'Zero modification'],
-              icon: 'deploy',
             },
             {
-              title: 'Post-Deploy',
+              title: checkStages[1].title,
               description: 'After chain is live',
-              checks: ['Network status diff', 'Validator set verification', 'Genesis consistency'],
-              icon: 'verify',
+              checks: checkStages[1].checks.map((c) => c.name),
             },
           ].map((stage, idx) => (
             <div key={stage.title} className="reveal-stage relative">
