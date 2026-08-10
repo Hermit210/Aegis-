@@ -40,8 +40,8 @@ export default function Hero() {
           className="text-center mb-16"
         >
           <h1 className="text-6xl md:text-7xl font-bold mb-6 leading-tight">
-            Know Your Deploy
-            <span className="block text-primary">Actually Worked</span>
+            Deployed Isn&apos;t
+            <span className="block text-primary">The Same As Verified</span>
           </h1>
           <p className="text-xl text-text-secondary max-w-3xl mx-auto mb-8">
             Avalanche CLI says success but how do you know? Deploy Assurance gives builders certainty
