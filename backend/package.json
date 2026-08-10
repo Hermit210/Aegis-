@@ -17,10 +17,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json"
   },
   "dependencies": {
-    "@avalabs/avalanchejs": "^5.0.0",
     "commander": "^13.0.0",
     "fastify": "^5.0.0"
   },
