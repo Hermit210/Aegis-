@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Navigation from "@/components/Navigation"
 import Footer from "@/components/Footer"
+import SmoothScroll from "@/components/SmoothScroll"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -21,8 +22,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en">
       <body className="bg-background text-text-primary antialiased min-h-screen flex flex-col">
+        <SmoothScroll />
         <Navigation />
         <main className="flex-1">{children}</main>
         <Footer />
