@@ -15,13 +15,16 @@ type JsonRpcResponse<T> = {
 }
 
 /**
- * Calls an AvalancheGo JSON-RPC endpoint. Used for P-Chain (public) and, when a
- * caller supplies its own nodeUrl, node-specific chain RPCs.
+ * Calls a JSON-RPC endpoint. Used for AvalancheGo's own methods (P-Chain
+ * calls take an object of named params, e.g. platform.getCurrentValidators)
+ * and for standard Ethereum JSON-RPC methods on chain RPCs (eth_* methods
+ * take a positional array, e.g. eth_getBlockByNumber(["0x0", false])) — the
+ * spec allows either shape, so callers pass whichever the method expects.
  */
 export async function callJsonRpc<T>(
   baseUrl: string,
   method: string,
-  params: Record<string, unknown> = {}
+  params: unknown[] | Record<string, unknown> = []
 ): Promise<T> {
   let response: Response
   try {
