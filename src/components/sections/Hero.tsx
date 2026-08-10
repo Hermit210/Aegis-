@@ -3,21 +3,27 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, Terminal, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
+import AnimatedStat from '@/components/AnimatedStat'
 
 export default function Hero() {
-  const terminalLines = [
+  const terminalLines: { text: string; delay: number; healthScore?: number }[] = [
     { text: '$ avalanche-deploy verify', delay: 0.1 },
     { text: 'Scanning deployment...', delay: 0.6 },
     { text: '  RPC connection verified', delay: 1.2 },
     { text: '  Validator set synchronized', delay: 1.6 },
     { text: '  Config applied correctly', delay: 2.0 },
-    { text: '  Health score: 98%', delay: 2.4 },
+    { text: '  Health score: ', delay: 2.4, healthScore: 98 },
   ]
 
-  const healthMetrics = [
+  const healthMetrics: {
+    label: string
+    value?: string
+    count?: number
+    suffix?: string
+  }[] = [
     { label: 'Deployment Status', value: 'Verified' },
-    { label: 'RPC Nodes', value: '3/3 Healthy' },
-    { label: 'Validators', value: '5/5 Active' },
+    { label: 'RPC Nodes', count: 3, suffix: '/3 Healthy' },
+    { label: 'Validators', count: 5, suffix: '/5 Active' },
     { label: 'Config State', value: 'Synced' },
   ]
 
@@ -84,6 +90,9 @@ export default function Hero() {
                   className="text-text-secondary"
                 >
                   {line.text}
+                  {line.healthScore !== undefined && (
+                    <AnimatedStat end={line.healthScore} suffix="%" delay={line.delay + 0.2} duration={1.2} />
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -103,7 +112,13 @@ export default function Hero() {
                 transition={{ delay: 2.0 + idx * 0.15 }}
                 className="bg-card border border-border rounded-lg p-4 text-center"
               >
-                <div className="text-2xl font-bold mb-2 text-success">{metric.value}</div>
+                <div className="text-2xl font-bold mb-2 text-success">
+                  {metric.count !== undefined ? (
+                    <AnimatedStat end={metric.count} suffix={metric.suffix} delay={2.0 + idx * 0.15 + 0.2} duration={1} />
+                  ) : (
+                    metric.value
+                  )}
+                </div>
                 <div className="text-xs text-text-secondary font-medium">{metric.label}</div>
               </motion.div>
             ))}

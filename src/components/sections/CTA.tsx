@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { ArrowRight, GitBranch } from 'lucide-react'
+import AnimatedStat from '@/components/AnimatedStat'
 
 export default function CTA() {
   return (
@@ -73,7 +74,7 @@ export default function CTA() {
 
 ┌─────────────────────────────────────┐
 │ Deployment: mychain                 │
-│ Health: 100% • All checks passed    │
+│ Health: `}<AnimatedStat end={100} suffix="%" scrollSpy duration={1.5} />{` • All checks passed    │
 │ RPC: responding • Validators: 5 ✓   │
 └─────────────────────────────────────┘`}
             </code>
