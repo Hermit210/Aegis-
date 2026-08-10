@@ -1,0 +1,67 @@
+# Example workflow for verifying an Avalanche L1 deployment with Aegis and
+# failing the build if the health score drops below a threshold.
+#
+# This is a template, not a live workflow — rename to `aegis-verify.yml` (and
+# drop the enclosing `workflows/` if copying elsewhere) in *your* repo, after
+# adjusting the inputs below for your target. It's kept as `.example` here
+# because this repo has no real chain of its own to verify.
+#
+# The backend isn't published as an npm package yet (v0.1), so this checks out
+# and builds Aegis from source. Once published, replace the checkout/build
+# steps with `npm install -g @aegis/backend` (or `npx`) instead.
+
+name: Aegis Verify
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: "mainnet | fuji | local"
+        default: "fuji"
+      node-id:
+        description: "NodeID to check validator registration for"
+        required: false
+      threshold:
+        description: "Minimum acceptable health score (0.0-1.0)"
+        default: "0.8"
+  # Uncomment to run automatically, e.g. after a deploy step:
+  # push:
+  #   branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Aegis
+        uses: actions/checkout@v4
+        with:
+          repository: Hermit210/Aegis-
+          path: aegis
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install and build
+        working-directory: aegis/backend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Run verification
+        working-directory: aegis/backend
+        run: |
+          node dist/cli/index.js verify \
+            --network "${{ inputs.network || 'fuji' }}" \
+            ${{ inputs.node-id && format('--node-id {0}', inputs.node-id) || '' }} \
+            --json > report.json
+          cat report.json
+
+      - name: Enforce health score threshold
+        working-directory: aegis/backend
+        run: |
+          SCORE=$(node -e "const r=JSON.parse(require('fs').readFileSync('report.json')); console.log(r.score ?? 0)")
+          THRESHOLD="${{ inputs.threshold || '0.8' }}"
+          echo "Health score: $SCORE (threshold: $THRESHOLD)"
+          node -e "process.exit(Number('$SCORE') >= Number('$THRESHOLD') ? 0 : 1)" \
+            || { echo "::error::Health score $SCORE is below threshold $THRESHOLD"; exit 1; }
