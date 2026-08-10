@@ -1,10 +1,15 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { animated } from '@react-spring/web'
 import { ArrowRight, GitBranch } from 'lucide-react'
 import AnimatedStat from '@/components/AnimatedStat'
+import { useButtonSpring } from '@/lib/useButtonSpring'
 
 export default function CTA() {
+  const githubSpring = useButtonSpring()
+  const demoSpring = useButtonSpring()
+
   return (
     <section id="cta" className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-secondary py-24">
       <div
@@ -48,22 +53,26 @@ export default function CTA() {
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <a
+            <animated.a
               href="https://github.com/Hermit210/Aegis-"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-white/90 transition group"
+              style={githubSpring.style}
+              {...githubSpring.bind}
+              className="flex items-center gap-2 px-8 py-4 bg-white text-primary font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-white/90 transition-colors group"
             >
               <GitBranch size={20} />
               Get Started on GitHub
               <ArrowRight size={20} className="group-hover:translate-x-1 transition" />
-            </a>
-            <a
+            </animated.a>
+            <animated.a
               href="#demo"
-              className="px-8 py-4 bg-transparent border border-white/40 text-white font-semibold rounded-lg hover:bg-white/10 transition"
+              style={demoSpring.style}
+              {...demoSpring.bind}
+              className="px-8 py-4 bg-transparent border border-white/40 text-white font-semibold rounded-lg hover:bg-white/10 transition-colors"
             >
               See Live Demo
-            </a>
+            </animated.a>
           </div>
 
           {/* Quick Example */}

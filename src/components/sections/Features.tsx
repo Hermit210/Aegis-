@@ -1,10 +1,47 @@
 'use client'
 
-import { Shield, Eye, Zap, Code2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { animated } from '@react-spring/web'
+import { Shield, Eye, Zap, Code2, AlertCircle, CheckCircle2, type LucideIcon } from 'lucide-react'
 import { useGsapReveal } from '@/lib/useGsapReveal'
+import { useButtonSpring } from '@/lib/useButtonSpring'
+
+type Feature = {
+  icon: LucideIcon
+  title: string
+  desc: string
+  items: string[]
+  size: 'lg' | 'md'
+}
+
+function FeatureCard({ feature }: { feature: Feature }) {
+  const Icon = feature.icon
+  const { style, bind } = useButtonSpring(true)
+
+  return (
+    <animated.div
+      style={style}
+      {...bind}
+      className={`reveal-item bg-card border border-border rounded-xl p-6 hover:border-primary transition-colors group ${feature.size === 'lg' ? 'lg:row-span-2' : ''}`}
+    >
+      <div className="mb-4 inline-block p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20">
+        <Icon className="w-6 h-6 text-primary" />
+      </div>
+      <h3 className="font-semibold mb-1">{feature.title}</h3>
+      <p className="text-sm text-text-secondary mb-4">{feature.desc}</p>
+      <ul className="space-y-2">
+        {feature.items.map((item) => (
+          <li key={item} className="flex items-center gap-2 text-xs text-text-secondary">
+            <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </animated.div>
+  )
+}
 
 export default function Features() {
-  const features = [
+  const features: Feature[] = [
     { icon: Zap, title: 'Pre-Flight', desc: 'Before deploy', items: ['RPCChainVM', 'Config', 'Ports'], size: 'lg' },
     { icon: Eye, title: 'Verification', desc: 'After deploy', items: ['RPC', 'Validators', 'Genesis'], size: 'lg' },
     { icon: Shield, title: 'Read-Only', desc: 'No changes', items: ['Safe', 'Secure', 'Trust'], size: 'md' },
@@ -24,26 +61,9 @@ export default function Features() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((f) => {
-            const Icon = f.icon
-            return (
-              <div key={f.title} className={`reveal-item bg-card border border-border rounded-xl p-6 hover:border-primary transition group ${f.size === 'lg' ? 'lg:row-span-2' : ''}`}>
-                <div className="mb-4 inline-block p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20">
-                  <Icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-1">{f.title}</h3>
-                <p className="text-sm text-text-secondary mb-4">{f.desc}</p>
-                <ul className="space-y-2">
-                  {f.items.map(i => (
-                    <li key={i} className="flex items-center gap-2 text-xs text-text-secondary">
-                      <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                      {i}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )
-          })}
+          {features.map((feature) => (
+            <FeatureCard key={feature.title} feature={feature} />
+          ))}
         </div>
       </div>
     </section>

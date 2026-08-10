@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Terminal, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import AnimatedStat from '@/components/AnimatedStat'
+import Button from '@/components/ui/Button'
 
 export default function Hero() {
   const terminalLines: { text: string; delay: number; healthScore?: number }[] = [
@@ -49,22 +50,14 @@ export default function Hero() {
 
           <div className="flex gap-4 justify-center">
             <Link href="#demo">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-primary hover:bg-primary/90 text-background px-8 py-4 rounded-lg font-semibold flex items-center gap-2 transition"
-              >
+              <Button className="bg-primary hover:bg-primary/90 text-background">
                 Try Demo <ArrowRight className="w-4 h-4" />
-              </motion.button>
+              </Button>
             </Link>
             <Link href="/problem">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="border border-primary text-primary hover:bg-primary/10 px-8 py-4 rounded-lg font-semibold transition"
-              >
+              <Button className="border border-primary text-primary hover:bg-primary/10 bg-transparent">
                 Learn More
-              </motion.button>
+              </Button>
             </Link>
           </div>
         </motion.div>

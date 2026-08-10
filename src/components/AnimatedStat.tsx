@@ -1,23 +1,7 @@
 'use client'
 
-import { useSyncExternalStore } from 'react'
 import CountUp from 'react-countup'
-
-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
-
-function subscribeToReducedMotion(callback: () => void) {
-  const mql = window.matchMedia(REDUCED_MOTION_QUERY)
-  mql.addEventListener('change', callback)
-  return () => mql.removeEventListener('change', callback)
-}
-
-function getReducedMotionSnapshot() {
-  return window.matchMedia(REDUCED_MOTION_QUERY).matches
-}
-
-function getReducedMotionServerSnapshot() {
-  return false
-}
+import { useReducedMotion } from '@/lib/useReducedMotion'
 
 type AnimatedStatProps = {
   end: number
@@ -42,11 +26,7 @@ export default function AnimatedStat({
   scrollSpy = false,
   className,
 }: AnimatedStatProps) {
-  const reducedMotion = useSyncExternalStore(
-    subscribeToReducedMotion,
-    getReducedMotionSnapshot,
-    getReducedMotionServerSnapshot
-  )
+  const reducedMotion = useReducedMotion()
 
   if (reducedMotion) {
     return (

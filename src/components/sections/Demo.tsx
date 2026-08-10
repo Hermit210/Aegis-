@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion'
 import { Play, CheckCircle2, Clock } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import Button from '@/components/ui/Button'
 
 export default function Demo() {
   const [isRunning, setIsRunning] = useState(false)
@@ -46,15 +47,15 @@ export default function Demo() {
               <h3 className="font-semibold">mychain</h3>
               <p className="text-xs text-text-secondary">Deployment Verification</p>
             </div>
-            <button
+            <Button
               onClick={() => setIsRunning(!isRunning)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
+              className={`px-4 py-2 font-medium ${
                 isRunning ? 'bg-error/20 text-error' : 'bg-primary text-background'
               }`}
             >
               <Play className="w-4 h-4" />
               {isRunning ? 'Stop' : 'Run'}
-            </button>
+            </Button>
           </div>
           <div className="p-6">
             {results.length === 0 ? (
