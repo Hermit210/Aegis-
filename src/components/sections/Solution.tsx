@@ -2,8 +2,11 @@
 
 import { motion } from 'framer-motion'
 import { ArrowDown, CheckCircle2, AlertCircle, Zap } from 'lucide-react'
+import { useGsapReveal } from '@/lib/useGsapReveal'
 
 export default function Solution() {
+  const stagesRef = useGsapReveal<HTMLDivElement>({ selector: '.reveal-stage', y: 30, stagger: 0.12 })
+
   const DeploymentFlow = ({ title, steps }: { title: string; steps: any[] }) => (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">{title}</h3>
@@ -97,7 +100,7 @@ export default function Solution() {
         </motion.div>
 
         {/* Three Stages Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+        <div ref={stagesRef} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
           {[
             {
               title: 'Pre-Flight',
@@ -118,14 +121,7 @@ export default function Solution() {
               icon: 'verify',
             },
           ].map((stage, idx) => (
-            <motion.div
-              key={stage.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: idx * 0.1 }}
-              className="relative"
-            >
+            <div key={stage.title} className="reveal-stage relative">
               {/* Connector Arrow */}
               {idx < 2 && (
                 <div className="hidden md:block absolute -right-3 top-1/3">
@@ -145,7 +141,7 @@ export default function Solution() {
                   ))}
                 </ul>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 

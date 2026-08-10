@@ -1,7 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { Shield, Eye, Zap, Code2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { useGsapReveal } from '@/lib/useGsapReveal'
 
 export default function Features() {
   const features = [
@@ -13,19 +13,21 @@ export default function Features() {
     { icon: CheckCircle2, title: 'Easy', desc: 'Single binary', items: ['Auto-detect', 'Zero config', 'Remote'], size: 'md' },
   ]
 
+  const containerRef = useGsapReveal<HTMLDivElement>({ selector: '.reveal-item', y: 30, stagger: 0.12 })
+
   return (
     <section id="features" className="py-24 bg-surface border-t border-border">
-      <div className="max-w-6xl mx-auto px-6">
-        <motion.div initial={{opacity: 0}} animate={{opacity: 1}} className="mb-16">
+      <div ref={containerRef} className="max-w-6xl mx-auto px-6">
+        <div className="reveal-item mb-16">
           <h2 className="text-5xl font-bold mb-4">Built for Trust</h2>
           <p className="text-xl text-text-secondary">Six independent capabilities that verify your L1.</p>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((f, idx) => {
+          {features.map((f) => {
             const Icon = f.icon
             return (
-              <motion.div key={f.title} initial={{opacity: 0}} animate={{opacity: 1}} className={`bg-card border border-border rounded-xl p-6 hover:border-primary transition group ${f.size === 'lg' ? 'lg:row-span-2' : ''}`}>
+              <div key={f.title} className={`reveal-item bg-card border border-border rounded-xl p-6 hover:border-primary transition group ${f.size === 'lg' ? 'lg:row-span-2' : ''}`}>
                 <div className="mb-4 inline-block p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20">
                   <Icon className="w-6 h-6 text-primary" />
                 </div>
@@ -39,7 +41,7 @@ export default function Features() {
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
             )
           })}
         </div>
