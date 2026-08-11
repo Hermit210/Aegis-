@@ -158,7 +158,32 @@ Tracked honestly rather than silently left for someone to discover:
 
 - **Frontend isn't wired to the backend.** `src/lib/checks.ts` is static marketing copy, not a live call to `backend`'s `/verify`. Its check IDs and grouping (a `preflight`/`postdeploy` two-stage model) also don't match the real backend's flat six-check `verify()` run — e.g. the frontend's `vm-compat` is the backend's `version-compatibility`, `validator-set-verification` is `validator-registration`, `network-status-diff` is `network-state` (and doesn't actually diff against a CLI claim the way its copy describes).
 - **Project naming is inconsistent.** The GitHub repo is `Aegis-`, the backend package is `@aegis/backend` with CLI binary `aegis`, but this file's own page title/metadata (`src/app/layout.tsx`) say "Avalanche Deploy Assurance," which is what this README uses. Not yet resolved which name is canonical.
-- **Older design docs describing a different, unbuilt architecture exist outside this repository** — locally, on the machine this was developed on, there's a `docs/` folder (executive summary, engineering design, technical spec, repository structure, developer docs, and more) plus a root `README.md`, `CONTRIBUTING.md`, and `QUICKSTART.md` one directory above this repo. **None of that is tracked by this git repository or pushed to GitHub** — this repo's actual root has only ever contained what's listed under [Repository structure](#repository-structure) above. Some of those local-only docs describe a Go binary (`go install`), a three-command CLI (`preflight`/`verify`/`doctor`), a `.deploy-assurance.yaml` config file, and a check registry reading `avalanche-cli`'s own local state files — none of which was built. What's actually implemented is everything in `backend/` as documented in this README. Whether those local docs should be imported into this repo (and rewritten to match reality first) is an open decision.
+- **14 of the 18 docs below haven't been individually re-verified against the real implementation.** `docs/03`, `04`, `06`, and `07` were rewritten to match the actual TypeScript backend (they previously described an unbuilt Go design) before being imported into this repo, along with `CONTRIBUTING.md`. The remaining 14 — whitepaper, milestones, competitive analysis, grant proposal, etc. — were imported as-is and may still contain assumptions from before the backend existed (e.g. `docs/10-mvp-scope.md`'s original 3+3 preflight/postdeploy check split, which doesn't match the real flat six-check design). Treat this README and `backend/README.md` as the source of truth for anything they contradict.
+
+## Documentation
+
+| Doc | Contents | Status |
+|---|---|---|
+| [Executive Summary](./docs/01-executive-summary.md) | Problem, solution, impact | Not individually re-verified against the real implementation |
+| [Whitepaper](./docs/02-whitepaper.md) | Full technical/positioning writeup | Not individually re-verified against the real implementation |
+| [Engineering Design](./docs/03-engineering-design.md) | Modules, interfaces, internals | Rewritten to match the real TypeScript backend |
+| [Technical Specification](./docs/04-technical-specification.md) | Commands, flags, JSON schema | Rewritten to match the real TypeScript backend |
+| [System Architecture](./docs/05-system-architecture.md) | Mermaid diagrams | Not individually re-verified against the real implementation |
+| [Repository Structure](./docs/06-repository-structure.md) | Full repo layout | Rewritten to match the real TypeScript backend |
+| [Developer Docs](./docs/07-developer-documentation.md) | Install, usage, FAQ | Rewritten to match the real TypeScript backend |
+| [Grant Proposal](./docs/08-grant-proposal.md) | Team1 Mini Grant application | Not individually re-verified against the real implementation |
+| [Milestones](./docs/09-milestones.md) | Week-by-week plan | Not individually re-verified against the real implementation |
+| [MVP Scope](./docs/10-mvp-scope.md) | What v1 ships and doesn't | Describes the original 3+3 preflight/postdeploy split, which doesn't match the real flat six checks |
+| [V2 Roadmap](./docs/11-v2-roadmap.md) | Evidence-gated future features | Not individually re-verified against the real implementation |
+| [Security](./docs/12-security.md) | Threat model, failure modes | Broadly still accurate — no signing/write capability was added |
+| [Competitive Analysis](./docs/13-competitive-analysis.md) | vs. every adjacent tool | Not individually re-verified against the real implementation |
+| [Business Case](./docs/14-business-case.md) | OSS/maintenance rationale | Not individually re-verified against the real implementation |
+| [Landing Page Copy](./docs/15-landing-page-copy.md) | Marketing copy | Not individually re-verified against the real implementation |
+| [Release Plan](./docs/16-release-plan.md) | v0.1 → v1.0 | Not individually re-verified against the real implementation |
+| [License Recommendation](./docs/17-license-recommendation.md) | License rationale | Still accurate |
+| [Critical Review](./docs/20-critical-review.md) | Adversarial self-review | Worth reading — its scoring-formula concern is addressed above (weights are now documented per-check), its process concerns still stand |
+
+See also [`CONTRIBUTING.md`](./CONTRIBUTING.md) (rewritten to match the real backend) and [`QUICKSTART.md`](./QUICKSTART.md) (frontend-focused, lightly corrected).
 
 ## The frontend
 
@@ -247,7 +272,7 @@ CMD ["npm", "run", "start"]
 
 ## Contributing
 
-For the verification engine: new checks are the primary contribution surface — add a file to `backend/src/checks/`, register it in `backend/src/checks/index.ts`, and give it a weight in `backend/src/score/computeHealthScore.ts`. See [`backend/README.md`](./backend/README.md).
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full guide. For the verification engine: new checks are the primary contribution surface — add a file to `backend/src/checks/`, register it in `backend/src/checks/index.ts`, and give it a weight in `backend/src/score/computeHealthScore.ts`. See [`backend/README.md`](./backend/README.md).
 
 For the frontend: fork, branch, keep colors flowing through the CSS tokens in `globals.css` rather than hardcoding them in components, run `npm run lint` before opening a PR.
 
