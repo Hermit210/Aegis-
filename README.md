@@ -1,6 +1,15 @@
 # Avalanche Deploy Assurance
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](./backend/package.json)
+[![Backend unit tests](https://img.shields.io/badge/backend%20unit%20tests-51%20passing-brightgreen)](./backend)
+[![Live Fuji integration tests](https://img.shields.io/badge/live%20Fuji%20integration%20tests-4%20passing-brightgreen)](./backend/test/integration)
+[![TypeScript](https://img.shields.io/badge/backend-TypeScript-3178C6?logo=typescript&logoColor=white)](./backend)
+[![Next.js](https://img.shields.io/badge/frontend-Next.js%2016-black?logo=next.js)](./src)
+
 > Independent, read-only verification for Avalanche L1 deploys — six checks, a weighted health score, a CLI, and a JSON API, run directly against live RPC and P-Chain data instead of trusting any deploy tool's own status report. Plus the Next.js marketing/docs site that explains why.
+
+![Homepage hero](./docs/screenshots/hero.png)
 
 `avalanche-cli` is the tool most Avalanche L1 builders use to create, deploy, and manage a chain. It entered maintenance mode in December 2025 — no new Ava Labs-built features, only security/critical fixes, external contributions welcomed. Meanwhile, open issues document a real pattern: the CLI sometimes reports a deploy or validator-add as successful when the underlying chain state disagrees.
 
@@ -10,6 +19,8 @@
 | [#2526](https://github.com/ava-labs/avalanche-cli/issues/2526) | `addValidator` transaction succeeds but the validator set query comes back empty | Fees charged, validator never actually added |
 | [#2535](https://github.com/ava-labs/avalanche-cli/issues/2535) | `config.json` silently ignored, ports randomize after the Etna upgrade | Port mismatch, clients can't reconnect |
 | [#2458](https://github.com/ava-labs/avalanche-cli/issues/2458) | A Ledger signature failure forces a full re-run and re-charges subnet fees | Builder loses funds with no recovery path |
+
+**Contents:** [Architecture](#architecture) · [Status](#status-this-is-real-working-and-live-tested) · [The six checks](#the-six-checks) · [Health score](#health-score) · [CLI](#cli) · [JSON API](#json-api) · [Repository structure](#repository-structure) · [Testing](#testing-the-backend) · [Known gaps](#known-gaps) · [Documentation](#documentation) · [The frontend](#the-frontend) · [Contributing](#contributing)
 
 This repo closes that gap without touching the CLI itself: it reads directly from the live RPC and P-Chain, never trusting a deploy tool's own status report as ground truth. Every check either returns a real pass/fail/warn or honestly reports `unavailable` when the data it needs isn't reachable — it never fabricates a passing result.
 
@@ -25,6 +36,43 @@ Two things live here together, not as separate repos:
 
 - **`backend/`** — the real verification engine (this README's main subject below): six checks, a health score, a CLI, and a JSON API. Node/TypeScript, not a Go binary — see [Known gaps](#known-gaps) for why some older design docs say otherwise.
 - **`src/`** — the Next.js marketing/docs site (Tech Stack / Getting Started / Project Structure for *this* part are further down, under [The frontend](#the-frontend)).
+
+## Architecture
+
+```mermaid
+flowchart TB
+    CLI["CLI — aegis verify"]
+    API["JSON API — POST /verify"]
+    V["verify() orchestrator<br/>backend/src/verify.ts"]
+
+    CLI --> V
+    API --> V
+
+    subgraph Checks["The six checks — run together, one flat pass"]
+        C1["Port availability"]
+        C2["Validator registration"]
+        C3["Genesis consistency"]
+        C4["Network state"]
+        C5["Version compatibility"]
+        C6["Config resolution"]
+    end
+
+    V --> C1 & C2 & C3 & C4 & C5 & C6
+
+    C1 --> LS[("Local sockets")]
+    C2 --> PC[("P-Chain<br/>platform.getCurrentValidators")]
+    C3 --> PC
+    C3 --> RPC[("Target chain RPC<br/>eth_chainId / eth_getBlockByNumber")]
+    C4 --> RPC
+    C4 --> HAPI[("Node Health API")]
+    C5 --> IAPI[("Node Info API")]
+    C6 --> AAPI[("Node Admin API")]
+
+    C1 & C2 & C3 & C4 & C5 & C6 --> HS["computeHealthScore()<br/>weighted, renormalized"]
+    HS --> R["VerifyReport<br/>results + score + skipped"]
+```
+
+P-Chain reads go through [`@avalabs/avalanchejs`](https://www.npmjs.com/package/@avalabs/avalanchejs)'s `PVMApi`; Info/Health/Admin/chain-RPC calls use raw `fetch`-based JSON-RPC (that SDK doesn't wrap those APIs). Any check that can't reach what it needs returns `unavailable` — it never fabricates a `pass`.
 
 ## Status: this is real, working, and live-tested
 
@@ -48,6 +96,38 @@ Everything in `backend/` is implemented, not planned:
 
 Three checks (network state, version compatibility, config resolution) need Info/Health/Admin APIs that **AvalancheGo does not expose on the public API server** — that's a platform design decision, not a limitation of this tool. Point Aegis at your own node (`--node-url`) to unlock them. No check ever fabricates a pass: if the data it needs isn't reachable, it returns `unavailable` with a specific reason.
 
+The site's `/docs` page groups the six checks by what they look at — your node, or your deployed chain — screenshots below (all six run together in one pass; this is a grouping for explanation, not separate CLI stages):
+
+<table>
+<tr>
+<td><img src="./docs/screenshots/six-checks-node.png" alt="Your node: version compatibility, config resolution, port availability" width="440"></td>
+<td><img src="./docs/screenshots/six-checks-chain.png" alt="Your chain: validator registration, genesis consistency, network state" width="440"></td>
+</tr>
+</table>
+
+**Genesis consistency**, the differentiator no other tool covers — a blockchain's ID *is* the ID of the P-Chain transaction that created it, so the exact genesis submitted at chain creation can be looked up on-chain, no local file needed:
+
+```mermaid
+sequenceDiagram
+    participant U as aegis verify
+    participant P as P-Chain
+    participant C as Target chain RPC
+
+    U->>P: platform.getTx(txID = blockchainId, encoding: json)
+    P-->>U: CreateChainTx incl. genesisData (base64)
+    Note over U: decode genesisData -> config.chainId
+    U->>C: eth_chainId
+    C-->>U: live chainId
+    Note over U: compare creationChainId vs. liveChainId
+    alt chainId matches
+        U-->>U: pass — also surfaces live genesis block hash (informational)
+    else chainId differs
+        U-->>U: fail — declared vs. live chainId mismatch
+    else P-Chain or chain RPC unreachable
+        U-->>U: unavailable — never a guessed result
+    end
+```
+
 Full detail and design rationale for each check: [`backend/README.md`](./backend/README.md).
 
 ## Health score
@@ -62,6 +142,16 @@ A single 0.0–1.0 number, computed in `backend/src/score/computeHealthScore.ts`
 | Version compatibility | 0.15 | Real risk, but well-documented with a clear fix (upgrade one side) |
 | Config resolution | 0.10 | Usually a misconfiguration to fix, not evidence the chain is broken; also the narrowest-scoped check |
 | Port availability | 0.05 | Almost always transient and trivially fixable |
+
+```mermaid
+pie showData title Health score weights
+    "Genesis consistency (0.30)" : 30
+    "Validator registration (0.20)" : 20
+    "Network state (0.20)" : 20
+    "Version compatibility (0.15)" : 15
+    "Config resolution (0.10)" : 10
+    "Port availability (0.05)" : 5
+```
 
 Scoring: pass = full credit, warn = half credit, fail = zero credit. A check that returns `unavailable` is excluded from both the numerator and the weight total — the remaining weights are renormalized across whatever actually ran, and every `unavailable` check is listed in the report's `skipped` array with its reason. A score never gets inflated by silently dropping checks the caller doesn't notice are missing.
 
@@ -157,6 +247,7 @@ npm run typecheck
 Tracked honestly rather than silently left for someone to discover:
 
 - **Frontend isn't wired to the backend.** `src/lib/checks.ts` is static marketing copy, not a live call to `backend`'s `/verify`. Its check IDs and grouping (a `preflight`/`postdeploy` two-stage model) also don't match the real backend's flat six-check `verify()` run — e.g. the frontend's `vm-compat` is the backend's `version-compatibility`, `validator-set-verification` is `validator-registration`, `network-status-diff` is `network-state` (and doesn't actually diff against a CLI claim the way its copy describes).
+- **`/architecture` also has stale, Go-era copy**, discovered while capturing screenshots for this README: `Architecture.tsx` describes "cobra commands," a "CLI config parser," and "Pre-flight checks"/"Post-deploy checks" — none of which exist in the real backend (no `cobra`, no CLI-state parser, no staged commands). Not fixed as part of this round's `checks.ts`/`ChecksBreakdown.tsx` correction; a screenshot of this page was deliberately left out of this README since it would misrepresent the real system.
 - **Project naming is inconsistent.** The GitHub repo is `Aegis-`, the backend package is `@aegis/backend` with CLI binary `aegis`, but this file's own page title/metadata (`src/app/layout.tsx`) say "Avalanche Deploy Assurance," which is what this README uses. Not yet resolved which name is canonical.
 - **14 of the 18 docs below haven't been individually re-verified against the real implementation.** `docs/03`, `04`, `06`, and `07` were rewritten to match the actual TypeScript backend (they previously described an unbuilt Go design) before being imported into this repo, along with `CONTRIBUTING.md`. The remaining 14 — whitepaper, milestones, competitive analysis, grant proposal, etc. — were imported as-is and may still contain assumptions from before the backend existed (e.g. `docs/10-mvp-scope.md`'s original 3+3 preflight/postdeploy check split, which doesn't match the real flat six-check design). Treat this README and `backend/README.md` as the source of truth for anything they contradict.
 
