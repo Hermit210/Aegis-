@@ -65,8 +65,8 @@ export default function ChecksBreakdown() {
           >
             <h2 className="text-5xl font-bold mb-4">The Six Checks</h2>
             <p className="text-xl text-text-secondary max-w-2xl">
-              Three run before deploy, three run after. Hover any underlined term for a plain-language
-              explanation.
+              All six run together in a single pass — grouped here by what they check, your node or your
+              chain, not by when they run. Hover any underlined term for a plain-language explanation.
             </p>
           </motion.div>
 

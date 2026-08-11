@@ -7,7 +7,7 @@ export type Check = {
 }
 
 export type CheckStage = {
-  id: 'preflight' | 'postdeploy'
+  id: 'node' | 'chain'
   title: string
   description: string
   checks: Check[]
@@ -23,56 +23,65 @@ export const glossary: Record<string, string> = {
   Subnet: 'A dynamic set of validators securing one or more custom blockchains on Avalanche.',
 }
 
+/**
+ * All six checks run together in a single pass (`aegis verify`) — there's
+ * no separate "preflight" or "postdeploy" command. Grouped here by what
+ * each check actually looks at: your AvalancheGo node's own setup, or a
+ * specific deployed chain's on-chain/live state — not by when they run.
+ */
 export const checkStages: CheckStage[] = [
   {
-    id: 'preflight',
-    title: 'Pre-Flight',
-    description: 'Run before deploy is attempted, catching issues before they cost you a broken chain.',
+    id: 'node',
+    title: 'Your node',
+    description:
+      "Checks your AvalancheGo node's own setup — version compatibility, resolved config, and port availability. Needs your own node (--node-url); not reachable via Avalanche's public API server.",
     checks: [
       {
-        id: 'vm-compat',
+        id: 'version-compatibility',
         name: 'AvalancheGo ↔ VM compatibility',
         description:
-          "Confirms the node's AvalancheGo version and the VM's RPCChainVM protocol version are compatible before deploy is attempted.",
+          "Compares the node's reported RPCChainVM protocol version against subnet-evm's own published compatibility data, so a version mismatch is caught early.",
         terms: ['AvalancheGo', 'RPCChainVM', 'VM'],
       },
       {
-        id: 'config-resolution',
+        id: 'config-validation',
         name: 'Config resolution',
         description:
-          'Resolves CLI flags, config files, and defaults into the config AvalancheGo will actually run with, and flags conflicts.',
+          "Checks the Admin API's actually-resolved config for a handful of well-known flags — a project-owned schema, since no canonical one is published by Ava Labs.",
       },
       {
         id: 'port-availability',
         name: 'Port availability',
         description:
-          'Checks that the staking and API ports the node needs are free before deploy attempts to bind them.',
+          'Checks that the staking and API ports the node needs are free — the only check that needs nothing at all, not even a node.',
       },
     ],
   },
   {
-    id: 'postdeploy',
-    title: 'Post-Deploy',
-    description: 'Run after the chain is live, independently verifying what the CLI reported instead of trusting it.',
+    id: 'chain',
+    title: 'Your chain',
+    description:
+      "Checks a specific deployed chain's actual on-chain and live state, independent of what any deploy tool reports. Validator registration and genesis consistency work against Avalanche's public P-Chain; network state's chain-RPC half needs a reachable RPC endpoint.",
     checks: [
       {
-        id: 'network-status-diff',
-        name: 'Network status diff',
+        id: 'validator-registration',
+        name: 'Validator registration',
         description:
-          'Independently queries RPC and diffs the result against what the CLI claimed, surfacing any disagreement immediately.',
-      },
-      {
-        id: 'validator-set-verification',
-        name: 'Validator set verification',
-        description:
-          "Queries the P-Chain's validator set directly to confirm nodes are registered, connected, and staked as expected.",
+          "Queries the P-Chain's validator set directly to confirm a NodeID is registered, connected, staked, and its uptime — not just that a transaction was submitted.",
         terms: ['P-Chain', 'Validator set'],
       },
       {
         id: 'genesis-consistency',
         name: 'Genesis consistency',
-        description: 'Compares the on-chain genesis state against the local genesis file to catch silent misconfiguration.',
-        terms: ['Genesis'],
+        description:
+          "Looks up the on-chain genesis-creation transaction — a blockchain's ID is the ID of the P-Chain transaction that created it — and compares its declared chain ID against what the live chain currently reports. No local genesis file needed.",
+        terms: ['Genesis', 'P-Chain'],
+      },
+      {
+        id: 'network-state',
+        name: 'Network state',
+        description:
+          "Two independent checks: the node's own Health API, and direct RPC reachability on the target chain — so a health-report glitch and an actually-unreachable chain read as different problems.",
       },
     ],
   },
