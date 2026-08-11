@@ -44,4 +44,17 @@ describe('versionCompatibilityCheck', () => {
     const result = await versionCompatibilityCheck.run({ nodeUrl: 'http://localhost:9650' })
     expect(result.status).toBe('unavailable')
   })
+
+  it('reports the real subnet-evm versions compatible with a known rpcProtocolVersion', async () => {
+    mockInfo({
+      jsonrpc: '2.0',
+      id: 1,
+      result: { version: 'avalanche/1.13.5', databaseVersion: '1.0.0', rpcProtocolVersion: '44' },
+    })
+
+    const result = await versionCompatibilityCheck.run({ nodeUrl: 'http://localhost:9650' })
+
+    expect(result.status).toBe('pass')
+    expect(result.message).toContain('v0.8.0')
+  })
 })

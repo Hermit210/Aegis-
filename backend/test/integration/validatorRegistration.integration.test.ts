@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { validatorRegistrationCheck, getCurrentValidators } from '../../src/checks/validatorRegistration.js'
-import { PUBLIC_P_CHAIN_URL } from '../../src/lib/avalancheRpc.js'
+import { PUBLIC_AVALANCHE_BASE_URL } from '../../src/lib/avalancheRpc.js'
 
 /**
  * Hits real Fuji testnet P-Chain infrastructure. Not part of the default
@@ -10,7 +10,7 @@ import { PUBLIC_P_CHAIN_URL } from '../../src/lib/avalancheRpc.js'
  */
 describe('validatorRegistrationCheck (live Fuji testnet)', () => {
   it('passes for a real, currently-registered Fuji validator', async () => {
-    const validators = await getCurrentValidators(PUBLIC_P_CHAIN_URL.fuji)
+    const validators = await getCurrentValidators(PUBLIC_AVALANCHE_BASE_URL.fuji)
     expect(validators.length).toBeGreaterThan(0)
 
     const liveNodeId = validators[0].nodeID

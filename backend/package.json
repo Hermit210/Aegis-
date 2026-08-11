@@ -5,7 +5,7 @@
   "description": "Real-time deployment verification engine for Avalanche L1s: six independent checks, a health score, a CLI, and a JSON API.",
   "type": "module",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "bin": {
     "aegis": "./dist/cli/index.js"
@@ -20,6 +20,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json"
   },
   "dependencies": {
+    "@avalabs/avalanchejs": "^5.1.0",
     "commander": "^13.0.0",
     "fastify": "^5.0.0"
   },

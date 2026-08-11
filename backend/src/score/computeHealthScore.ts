@@ -11,11 +11,25 @@ export type CheckWeight = { id: string; weight: number }
  * 1.0 across all six so a fully-run verification maps cleanly to 0.0–1.0.
  */
 export const DEFAULT_WEIGHTS: CheckWeight[] = [
+  // 0.30 — hardest failure to recover from; the check no other tool covers.
   { id: 'genesis-consistency', weight: 0.3 },
+  // 0.20 — a validator silently missing/disconnected from the set it should
+  // be in is a deploy that looks done but isn't actually securing anything.
   { id: 'validator-registration', weight: 0.2 },
+  // 0.20 — tied with validator registration: an unhealthy node or an
+  // unreachable chain RPC means nothing else in the report can be trusted
+  // as current, even if it individually passed.
   { id: 'network-state', weight: 0.2 },
+  // 0.15 — a real risk (mismatched RPCChainVM protocol can break block
+  // production), but it's a known, well-documented failure mode with a
+  // clear fix (upgrade one side), unlike genesis or validator issues.
   { id: 'version-compatibility', weight: 0.15 },
+  // 0.10 — config drift is usually a misconfiguration to fix, not evidence
+  // the chain itself is broken; also the check with the narrowest scope
+  // (only a handful of well-known flags, no published canonical schema).
   { id: 'config-validation', weight: 0.1 },
+  // 0.05 — almost always transient/trivially fixable, not evidence the
+  // deployment itself is broken.
   { id: 'port-availability', weight: 0.05 },
 ]
 

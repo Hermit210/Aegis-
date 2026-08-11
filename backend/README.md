@@ -18,24 +18,49 @@ designed. So:
 |---|---|---|
 | Port availability | nothing | local sockets (always works) |
 | Validator registration | `--network` (public) or `--node-url` | real Fuji testnet data |
-| Genesis consistency | local genesis file + `--chain-rpc-url` (public for chains with a public RPC) | real Fuji C-Chain |
-| Network state | `--node-url` (your own node) | mocked only — needs a real node to try live |
-| Version compatibility | `--node-url` (your own node) | mocked only — needs a real node to try live |
+| Genesis consistency | `--blockchain-id` + `--network`/`--node-url` (P-Chain), plus `--chain-rpc-url` or `--node-url`+`--blockchain-id` (chain RPC) — no local file needed | real Fuji P-Chain + C-Chain |
+| Network state | chain-RPC half: `--chain-rpc-url` (public) or `--node-url`+`--blockchain-id`; Health-API half: `--node-url` (your own node) | chain-RPC reachability live-tested against Fuji C-Chain; Health API half still mocked only — needs a real node |
+| Version compatibility | `--node-url` (your own node) | compatibility data verified against real subnet-evm compatibility.json; the check itself is mocked-only in tests — needs a real node to try live end-to-end |
 | Config resolution | `--node-url` with `--api-admin-enabled=true` | mocked only — needs a real node to try live |
 
-"Genesis consistency" is intentionally scoped down from full on-chain genesis
-verification: fully re-deriving a genesis block hash means reimplementing
-block-header RLP encoding + Keccak hashing (real EVM client internals).
-Instead it compares the local genesis file's `config.chainId` against what
-the live chain reports, and surfaces the live genesis block hash as
+"Genesis consistency" sources genesis entirely on-chain — no local genesis
+file needed. A blockchain's ID is the ID of the P-Chain transaction that
+created it, so `platform.getTx` on that ID returns the exact genesis JSON
+submitted at chain creation (base64-encoded in the tx's `genesisData`
+field). That's compared against what the live chain currently reports. It's
+intentionally scoped down from full genesis re-verification: fully
+re-deriving a genesis block hash means reimplementing block-header RLP
+encoding + Keccak hashing (real EVM client internals), so this compares
+`config.chainId` specifically and surfaces the live genesis block hash as
 informational context. See `src/checks/genesisConsistency.ts` for the full
-reasoning.
+reasoning, and its live-fetched verification of the `platform.getTx`
+response shape against real Fuji data.
 
-"Version compatibility" ships with an intentionally near-empty compatibility
-table (`src/checks/rpcChainVmCompatibility.ts`) rather than fabricated
-version-number mappings — no canonical machine-readable feed exists (Ava Labs
-publishes compatibility as release-note prose), so this needs to be populated
-from the actual AvalancheGo release notes for the versions you care about.
+"Version compatibility" table (`src/checks/rpcChainVmCompatibility.ts`) is
+sourced from subnet-evm's own published `compatibility.json` (real,
+canonical, machine-readable — see the file for the source URL and fetch
+date), mapping AvalancheGo's rpcProtocolVersion to compatible subnet-evm
+versions. Covers subnet-evm specifically, the VM this project's
+genesis-consistency check targets; other VMs would need their own published
+compatibility feed to extend this.
+
+## SDK usage
+
+P-Chain reads (`platform.getCurrentValidators`, `platform.getTx`) go through
+[`@avalabs/avalanchejs`](https://www.npmjs.com/package/@avalabs/avalanchejs)'s
+`pvm.PVMApi` rather than hand-rolled JSON-RPC. Info/Health/Admin API calls and
+chain-RPC (`eth_*`) calls stay on raw `fetch` (`src/lib/avalancheRpc.ts`) —
+AvalancheJS is a P/X/C-Chain transaction/query SDK, it doesn't wrap those
+other APIs at all, so there's nothing to switch there. **Requires Node
+>=20** (the SDK's own engines requirement — bumped from the previous >=18).
+
+Note: the package's published `.d.ts` files use extensionless relative
+specifiers (`export * from './vms'`) that don't resolve under this
+project's `moduleResolution: "NodeNext"` — a real upstream packaging bug
+(confirmed via `tsc --traceResolution`), not a local misconfiguration.
+Worked around with a minimal ambient module declaration in
+`src/types/avalanchejs.d.ts`, scoped to only the methods actually used here,
+typed against real captured Fuji responses rather than guessed.
 
 ## Quick start
 

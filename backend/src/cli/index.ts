@@ -43,7 +43,6 @@ function buildTarget(nodeUrl: string | undefined, options: Record<string, string
   if (options.subnetId) target.subnetId = options.subnetId
   if (options.blockchainId) target.blockchainId = options.blockchainId
   if (options.chainRpcUrl) target.chainRpcUrl = options.chainRpcUrl
-  if (options.genesisPath) target.genesisPath = options.genesisPath
   if (options.ports) target.ports = options.ports.split(',').map((p) => parseInt(p.trim(), 10))
   return target
 }
@@ -63,9 +62,8 @@ program
   .option('--network <network>', 'mainnet | fuji | local — used for P-Chain checks when no nodeUrl is given')
   .option('--node-id <nodeId>', 'NodeID to look up in the validator set')
   .option('--subnet-id <subnetId>', 'Subnet ID to scope validator/health checks to')
-  .option('--blockchain-id <blockchainId>', 'Blockchain ID, for genesis consistency via nodeUrl')
-  .option('--chain-rpc-url <url>', "The chain's own RPC URL, for genesis consistency")
-  .option('--genesis-path <path>', 'Path to the local genesis file, for genesis consistency')
+  .option('--blockchain-id <blockchainId>', 'Blockchain ID, for genesis consistency / network state via nodeUrl')
+  .option('--chain-rpc-url <url>', "The chain's own RPC URL, for genesis consistency / network state")
   .option('--ports <ports>', 'Comma-separated ports to check for availability')
   .option('--json', 'Output the full report as JSON instead of a human-readable summary')
   .action(async (nodeUrl: string | undefined, options) => {

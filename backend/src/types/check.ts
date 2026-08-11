@@ -24,8 +24,6 @@ export type CheckTarget = {
   subnetId?: string
   blockchainId?: string
   nodeId?: string
-  /** Path to the local genesis file, for genesis consistency. */
-  genesisPath?: string
   /** Ports to check for availability (defaults to Avalanche's standard staking/API ports). */
   ports?: number[]
 }

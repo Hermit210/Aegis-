@@ -1,22 +1,25 @@
 /**
- * Maps AvalancheGo's rpcProtocolVersion (from info.getNodeVersion) to the VM
- * versions known to be compatible with it. No canonical machine-readable feed
- * exists for this (per Avalanche's own docs) — Ava Labs publishes it as prose
- * in each release's notes, so this table has to be maintained by hand.
+ * Maps AvalancheGo's rpcProtocolVersion (from info.getNodeVersion) to
+ * subnet-evm versions confirmed compatible with it.
  *
- * Deliberately seeded with only ONE illustrative, clearly-unverified entry
- * rather than a full table of specific version numbers pulled from memory:
- * fabricating precise compatibility data I'm not confident is currently
- * correct would be worse than admitting the table is empty, since a wrong
- * "pass" here is actively misleading. Populate this from the actual
- * AvalancheGo release notes for the versions you care about — see
- * backend/README.md.
+ * Sourced directly from subnet-evm's own published compatibility.json — a
+ * real canonical, machine-readable feed. (An earlier version of this file
+ * assumed no such feed existed and shipped a single unverified placeholder
+ * entry instead; that assumption was wrong for subnet-evm specifically,
+ * which is the VM this project's genesis-consistency check targets. Other
+ * VMs would need their own published compatibility.json to add here.)
+ *
+ * Source: https://raw.githubusercontent.com/ava-labs/subnet-evm/master/compatibility.json
+ * Fetched: 2026-08-11. Re-fetch and update this table when adding support
+ * for newer AvalancheGo/subnet-evm releases — don't hand-edit version
+ * numbers from memory.
  */
-export const RPC_CHAIN_VM_COMPATIBILITY: Record<number, { avalancheGoVersions: string[]; note: string }> = {
-  // Illustrative only — verify against https://github.com/ava-labs/avalanchego/releases
-  // before relying on this for a real compatibility decision.
-  39: {
-    avalancheGoVersions: ['v1.13.x (example — verify against release notes)'],
-    note: 'UNVERIFIED placeholder entry. Replace with real data from the AvalancheGo release you are targeting.',
-  },
+export const RPC_CHAIN_VM_COMPATIBILITY: Record<number, { subnetEvmVersions: string[] }> = {
+  44: { subnetEvmVersions: ['v0.8.0'] },
+  43: { subnetEvmVersions: ['v0.7.9', 'v0.7.8'] },
+  42: { subnetEvmVersions: ['v0.7.7', 'v0.7.6'] },
+  41: { subnetEvmVersions: ['v0.7.5'] },
+  40: { subnetEvmVersions: ['v0.7.4'] },
+  39: { subnetEvmVersions: ['v0.7.3', 'v0.7.2', 'v0.7.1'] },
+  38: { subnetEvmVersions: ['v0.7.0'] },
 }

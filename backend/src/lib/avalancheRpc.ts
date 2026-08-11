@@ -70,19 +70,35 @@ export async function fetchJson<T>(url: string): Promise<{ status: number; body:
   return { status: response.status, body }
 }
 
-/** P-Chain is public on Avalanche's API servers, unlike Info/Health/Admin. */
-export const PUBLIC_P_CHAIN_URL: Record<'mainnet' | 'fuji', string> = {
-  mainnet: 'https://api.avax.network/ext/bc/P',
-  fuji: 'https://api.avax-test.network/ext/bc/P',
+/** Public Avalanche API gateway hosts (P/X/C-Chain are exposed here; Info/Health/Admin are not). */
+export const PUBLIC_AVALANCHE_BASE_URL: Record<'mainnet' | 'fuji', string> = {
+  mainnet: 'https://api.avax.network',
+  fuji: 'https://api.avax-test.network',
 }
 
 /**
- * Resolves a P-Chain endpoint for the target: a specific node's own P-Chain
- * (available on any AvalancheGo node, not just the public gateway) if
- * nodeUrl is given, otherwise the public mainnet/fuji endpoint.
+ * Resolves a node *base* URL (no `/ext/...` suffix) for P-Chain queries made
+ * through AvalancheJS's PVMApi, which appends its own path internally: a
+ * specific node's own base URL if nodeUrl is given, otherwise the public
+ * mainnet/fuji gateway host.
  */
-export function resolvePChainUrl(target: CheckTarget): string | undefined {
-  if (target.nodeUrl) return `${target.nodeUrl.replace(/\/+$/, '')}/ext/bc/P`
-  if (target.network === 'mainnet' || target.network === 'fuji') return PUBLIC_P_CHAIN_URL[target.network]
+export function resolveNodeBaseUrl(target: CheckTarget): string | undefined {
+  if (target.nodeUrl) return target.nodeUrl.replace(/\/+$/, '')
+  if (target.network === 'mainnet' || target.network === 'fuji') return PUBLIC_AVALANCHE_BASE_URL[target.network]
+  return undefined
+}
+
+/**
+ * Resolves a chain-specific RPC endpoint: an explicit chainRpcUrl if given,
+ * otherwise derived from a node's own base URL + blockchainId. Shared by
+ * genesis-consistency (chain-state comparison) and network-state (RPC
+ * reachability), since both need "the target chain's own RPC," not the
+ * node's Info/Health/Admin APIs.
+ */
+export function resolveChainRpcUrl(target: CheckTarget): string | undefined {
+  if (target.chainRpcUrl) return target.chainRpcUrl
+  if (target.nodeUrl && target.blockchainId) {
+    return `${target.nodeUrl.replace(/\/+$/, '')}/ext/bc/${target.blockchainId}/rpc`
+  }
   return undefined
 }

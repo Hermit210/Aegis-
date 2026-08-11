@@ -49,7 +49,7 @@ export const versionCompatibilityCheck: Check = {
           ID,
           NAME,
           'unavailable',
-          `No compatibility data for rpcProtocolVersion ${info.rpcProtocolVersion} (node reports AvalancheGo ${info.version}). The compatibility table needs to be populated from current AvalancheGo release notes.`,
+          `No compatibility data for rpcProtocolVersion ${info.rpcProtocolVersion} (node reports AvalancheGo ${info.version}). Not in subnet-evm's published compatibility.json — see src/checks/rpcChainVmCompatibility.ts.`,
           startedAt,
           details
         )
@@ -59,7 +59,7 @@ export const versionCompatibilityCheck: Check = {
         ID,
         NAME,
         'pass',
-        `AvalancheGo ${info.version} (rpcProtocolVersion ${info.rpcProtocolVersion}) has known-compatible VM data: ${compat.note}`,
+        `AvalancheGo ${info.version} (rpcProtocolVersion ${info.rpcProtocolVersion}) is compatible with subnet-evm ${compat.subnetEvmVersions.join(', ')}.`,
         startedAt,
         details
       )

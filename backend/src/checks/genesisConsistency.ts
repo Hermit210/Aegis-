@@ -1,7 +1,7 @@
-import { readFile } from 'node:fs/promises'
+import { pvm } from '@avalabs/avalanchejs'
 import type { Check, CheckTarget } from '../types/check.js'
 import { resultOf } from '../types/check.js'
-import { AvalancheRpcError, callJsonRpc } from '../lib/avalancheRpc.js'
+import { AvalancheRpcError, callJsonRpc, resolveChainRpcUrl, resolveNodeBaseUrl } from '../lib/avalancheRpc.js'
 
 const ID = 'genesis-consistency'
 const NAME = 'Genesis consistency'
@@ -10,24 +10,29 @@ type SubnetEvmGenesis = {
   config?: { chainId?: number }
 }
 
-function resolveChainRpcUrl(target: CheckTarget): string | undefined {
-  if (target.chainRpcUrl) return target.chainRpcUrl
-  if (target.nodeUrl && target.blockchainId) {
-    return `${target.nodeUrl.replace(/\/+$/, '')}/ext/bc/${target.blockchainId}/rpc`
-  }
-  return undefined
+/**
+ * A blockchain's ID *is* the ID of the P-Chain CreateChainTx that created
+ * it (verified live: platform.getTx({txID: blockchainID, encoding:'json'})
+ * returns the transaction with a base64 `genesisData` field containing the
+ * exact genesis JSON submitted at creation — confirmed against both a
+ * user-created Fuji subnet-evm chain and Fuji's own C-Chain). That means
+ * genesis can be sourced entirely on-chain, with no local genesis file
+ * needed — the check no other tool can do, because it doesn't depend on
+ * having filesystem access to whatever machine ran the deploy.
+ */
+function decodeGenesisData(base64: string): SubnetEvmGenesis {
+  return JSON.parse(Buffer.from(base64, 'base64').toString('utf-8'))
 }
 
 /**
- * Scoped deliberately: fully re-deriving a subnet-evm genesis block hash means
- * reimplementing block-header RLP encoding + Keccak hashing, which is real EVM
- * client internals — attempting that without near-certainty of correctness
- * would risk a check that *looks* rigorous but silently gives wrong answers,
- * which is worse than the honest partial version below. Compares the one
- * piece that's simple, well-defined, and catches a real misconfiguration
- * class (local genesis chainId vs. what the live chain actually reports),
- * and surfaces the live genesis block hash as informational context rather
- * than claiming to have verified it.
+ * Scoped deliberately: fully re-deriving a subnet-evm genesis block hash
+ * would mean reimplementing block-header RLP encoding + Keccak hashing —
+ * real EVM client internals. Attempting that without near-certainty of
+ * correctness would risk a check that *looks* rigorous but silently gives
+ * wrong answers, which is worse than the honest partial version below.
+ * Compares the one piece that's simple, well-defined, and catches a real
+ * misconfiguration class: the chainId declared in the immutable
+ * genesis-creation transaction vs. what the live chain currently reports.
  */
 export const genesisConsistencyCheck: Check = {
   id: ID,
@@ -35,31 +40,72 @@ export const genesisConsistencyCheck: Check = {
   async run(target: CheckTarget) {
     const startedAt = Date.now()
 
-    if (!target.genesisPath) {
-      return resultOf(ID, NAME, 'unavailable', 'No local genesis file specified.', startedAt)
+    if (!target.blockchainId) {
+      return resultOf(
+        ID,
+        NAME,
+        'unavailable',
+        'No blockchainId specified. Genesis consistency looks up the on-chain genesis-creation transaction by blockchain ID.',
+        startedAt
+      )
     }
 
-    let genesis: SubnetEvmGenesis
+    const nodeBaseUrl = resolveNodeBaseUrl(target)
+    if (!nodeBaseUrl) {
+      return resultOf(
+        ID,
+        NAME,
+        'unavailable',
+        'No nodeUrl or network (mainnet/fuji) specified — cannot reach a P-Chain endpoint to look up the genesis-creation transaction.',
+        startedAt
+      )
+    }
+
+    let genesisDataB64: string | undefined
     try {
-      const raw = await readFile(target.genesisPath, 'utf-8')
-      genesis = JSON.parse(raw)
+      const api = new pvm.PVMApi(nodeBaseUrl)
+      const tx = await api.getTxJson({ txID: target.blockchainId })
+      genesisDataB64 = tx.tx.unsignedTx.genesisData
     } catch (err) {
       return resultOf(
         ID,
         NAME,
         'unavailable',
-        `Could not read/parse local genesis file at ${target.genesisPath}: ${(err as Error).message}`,
+        `Could not look up the genesis-creation transaction for blockchain ${target.blockchainId} at ${nodeBaseUrl}: ${(err as Error).message}`,
         startedAt
       )
     }
 
-    const localChainId = genesis.config?.chainId
-    if (localChainId === undefined) {
+    if (!genesisDataB64) {
       return resultOf(
         ID,
         NAME,
         'unavailable',
-        'Local genesis file has no config.chainId — is this a subnet-evm genesis?',
+        `platform.getTx for ${target.blockchainId} did not return genesisData — is this a valid blockchain ID?`,
+        startedAt
+      )
+    }
+
+    let onChainGenesis: SubnetEvmGenesis
+    try {
+      onChainGenesis = decodeGenesisData(genesisDataB64)
+    } catch (err) {
+      return resultOf(
+        ID,
+        NAME,
+        'unavailable',
+        `Could not parse genesisData for blockchain ${target.blockchainId}: ${(err as Error).message}`,
+        startedAt
+      )
+    }
+
+    const creationChainId = onChainGenesis.config?.chainId
+    if (creationChainId === undefined) {
+      return resultOf(
+        ID,
+        NAME,
+        'unavailable',
+        'The on-chain genesis-creation transaction has no config.chainId — is this a subnet-evm chain?',
         startedAt
       )
     }
@@ -70,32 +116,34 @@ export const genesisConsistencyCheck: Check = {
         ID,
         NAME,
         'unavailable',
-        'No chain RPC endpoint to query on-chain genesis state (need chainRpcUrl, or nodeUrl + blockchainId).',
+        'No chain RPC endpoint to query current live chain state (need chainRpcUrl, or nodeUrl + blockchainId).',
         startedAt,
-        { localChainId }
+        { creationChainId }
       )
     }
 
     try {
-      const [onChainChainIdHex, genesisBlock] = await Promise.all([
+      const [liveChainIdHex, genesisBlock] = await Promise.all([
         callJsonRpc<string>(chainRpcUrl, 'eth_chainId'),
-        callJsonRpc<{ hash: string; stateRoot: string }>(chainRpcUrl, 'eth_getBlockByNumber', ['0x0', false]),
+        callJsonRpc<{ hash: string }>(chainRpcUrl, 'eth_getBlockByNumber', ['0x0', false]),
       ])
 
-      const onChainChainId = parseInt(onChainChainIdHex, 16)
+      const liveChainId = parseInt(liveChainIdHex, 16)
       const details = {
-        localChainId,
-        onChainChainId,
+        blockchainId: target.blockchainId,
+        creationChainId,
+        liveChainId,
         genesisBlockHash: genesisBlock.hash,
-        chainRpcUrl,
+        pChainQueried: nodeBaseUrl,
+        chainRpcQueried: chainRpcUrl,
       }
 
-      if (onChainChainId !== localChainId) {
+      if (liveChainId !== creationChainId) {
         return resultOf(
           ID,
           NAME,
           'fail',
-          `Local genesis declares chainId ${localChainId}, but the live chain reports ${onChainChainId}.`,
+          `The on-chain genesis-creation transaction declared chainId ${creationChainId}, but the live chain currently reports ${liveChainId}.`,
           startedAt,
           details
         )
@@ -105,7 +153,7 @@ export const genesisConsistencyCheck: Check = {
         ID,
         NAME,
         'pass',
-        `Local genesis chainId (${localChainId}) matches the live chain. Genesis block hash reported on-chain is ${genesisBlock.hash} (informational — not independently re-derived from the local genesis file).`,
+        `Live chain's chainId (${liveChainId}) matches the chainId declared in its on-chain genesis-creation transaction. Genesis block hash currently reported is ${genesisBlock.hash} (informational — not independently re-derived from genesisData).`,
         startedAt,
         details
       )
@@ -114,7 +162,7 @@ export const genesisConsistencyCheck: Check = {
         err instanceof AvalancheRpcError
           ? err.message
           : `Unexpected error querying ${chainRpcUrl}: ${(err as Error).message}`
-      return resultOf(ID, NAME, 'unavailable', message, startedAt, { localChainId })
+      return resultOf(ID, NAME, 'unavailable', message, startedAt, { creationChainId })
     }
   },
 }

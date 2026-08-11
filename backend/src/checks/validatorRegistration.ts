@@ -1,30 +1,18 @@
+import { pvm } from '@avalabs/avalanchejs'
 import type { Check, CheckTarget } from '../types/check.js'
 import { resultOf } from '../types/check.js'
-import { AvalancheRpcError, callJsonRpc, resolvePChainUrl } from '../lib/avalancheRpc.js'
+import { resolveNodeBaseUrl } from '../lib/avalancheRpc.js'
 
 const ID = 'validator-registration'
 const NAME = 'Validator registration'
 
-type Validator = {
-  nodeID: string
-  weight?: string
-  connected?: boolean
-  uptime?: string
-  validationID?: string
-}
-
-type GetCurrentValidatorsResult = { validators: Validator[] }
-
-/** Calls platform.getCurrentValidators against a resolved P-Chain URL. Exported for reuse (e.g. genesis consistency). */
+/** Calls platform.getCurrentValidators via AvalancheJS's PVMApi against a resolved node base URL. Exported for reuse. */
 export async function getCurrentValidators(
-  pChainUrl: string,
-  params: { subnetID?: string; nodeIDs?: string[] } = {}
-): Promise<Validator[]> {
-  const { validators } = await callJsonRpc<GetCurrentValidatorsResult>(
-    pChainUrl,
-    'platform.getCurrentValidators',
-    params
-  )
+  nodeBaseUrl: string,
+  params: pvm.GetCurrentValidatorsParams = {}
+): Promise<pvm.ValidatorInfo[]> {
+  const api = new pvm.PVMApi(nodeBaseUrl)
+  const { validators } = await api.getCurrentValidators(params)
   return validators
 }
 
@@ -34,8 +22,8 @@ export const validatorRegistrationCheck: Check = {
   async run(target: CheckTarget) {
     const startedAt = Date.now()
 
-    const pChainUrl = resolvePChainUrl(target)
-    if (!pChainUrl) {
+    const nodeBaseUrl = resolveNodeBaseUrl(target)
+    if (!nodeBaseUrl) {
       return resultOf(
         ID,
         NAME,
@@ -49,7 +37,7 @@ export const validatorRegistrationCheck: Check = {
     }
 
     try {
-      const validators = await getCurrentValidators(pChainUrl, {
+      const validators = await getCurrentValidators(nodeBaseUrl, {
         nodeIDs: [target.nodeId],
         subnetID: target.subnetId,
       })
@@ -63,7 +51,7 @@ export const validatorRegistrationCheck: Check = {
           'fail',
           `${target.nodeId} is not in the current validator set for ${scope}.`,
           startedAt,
-          { queried: pChainUrl }
+          { queried: nodeBaseUrl }
         )
       }
 
@@ -83,15 +71,17 @@ export const validatorRegistrationCheck: Check = {
           weight: validator.weight,
           uptime: validator.uptime,
           connected: validator.connected,
-          queried: pChainUrl,
+          queried: nodeBaseUrl,
         }
       )
     } catch (err) {
-      const message =
-        err instanceof AvalancheRpcError
-          ? err.message
-          : `Unexpected error querying ${pChainUrl}: ${(err as Error).message}`
-      return resultOf(ID, NAME, 'unavailable', message, startedAt)
+      return resultOf(
+        ID,
+        NAME,
+        'unavailable',
+        `Could not query the validator set at ${nodeBaseUrl}: ${(err as Error).message}`,
+        startedAt
+      )
     }
   },
 }
