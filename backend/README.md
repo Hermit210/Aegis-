@@ -1,10 +1,12 @@
 # Aegis Backend
 
-The real verification engine behind the [Aegis marketing site](../README.md):
-six independent checks against live Avalanche infrastructure, a weighted
-0.0–1.0 health score, a CLI, and a JSON API. No mocked results — every check
-either returns a real pass/fail/warn, or honestly reports `unavailable` when
-the API it needs isn't reachable.
+The real verification engine behind [Avalanche Deploy Assurance](../README.md)
+(this package's own name and CLI binary are `aegis` — see the root repo
+README's Known Gaps section for the project-naming inconsistency that hasn't
+been resolved yet): six independent checks against live Avalanche
+infrastructure, a weighted 0.0–1.0 health score, a CLI, and a JSON API. No
+mocked results — every check either returns a real pass/fail/warn, or
+honestly reports `unavailable` when the API it needs isn't reachable.
 
 ## Status: which checks actually work right now
 
