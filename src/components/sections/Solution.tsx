@@ -64,21 +64,16 @@ export default function Solution() {
 
   const afterSteps = [
     { label: 'avalanche blockchain create', status: 'verify' },
-    {
-      label: 'avalanche-deploy-assurance preflight',
-      status: 'auto',
-      description: 'Catch issues before deploy',
-    },
     { label: 'avalanche blockchain deploy', status: 'verify' },
     {
-      label: 'avalanche-deploy-assurance verify',
+      label: 'aegis verify',
       status: 'auto',
-      description: 'Independently verify on-chain state',
+      description: 'One command, all six checks — no separate preflight/postdeploy stages',
     },
     {
       label: 'Deployment verified ✓',
       status: 'verify',
-      description: 'With health score and actionable fixes',
+      description: 'With a health score, run again any time — read-only, nothing to undo',
     },
   ]
 
@@ -93,19 +88,20 @@ export default function Solution() {
           transition={{ duration: 0.8 }}
           className="mb-16"
         >
-          <h2 className="text-5xl font-bold mb-4">Three Stages of Assurance</h2>
+          <h2 className="text-5xl font-bold mb-4">One Command, Run Anytime</h2>
           <p className="text-xl text-text-secondary max-w-2xl">
-            Pre-flight checks before you deploy, independent verification after. No manual
+            The same <code className="mx-1 px-1.5 py-0.5 rounded bg-surface border border-border text-sm">aegis verify</code> works before or after you deploy — checks that need a chain
+            that doesn&apos;t exist yet honestly report unavailable, not a fake pass. No manual
             cross-checking. No hidden failures.
           </p>
         </motion.div>
 
-        {/* Three Stages Overview */}
+        {/* Overview: what aegis verify checks, grouped conceptually around the deploy step */}
         <div ref={stagesRef} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
           {[
             {
               title: checkStages[0].title,
-              description: 'Before deploy is attempted',
+              description: 'What aegis verify checks about your node',
               checks: checkStages[0].checks.map((c) => c.name),
             },
             {
@@ -115,7 +111,7 @@ export default function Solution() {
             },
             {
               title: checkStages[1].title,
-              description: 'After chain is live',
+              description: 'What aegis verify checks once a chain exists',
               checks: checkStages[1].checks.map((c) => c.name),
             },
           ].map((stage, idx) => (
@@ -186,9 +182,9 @@ export default function Solution() {
         >
           <p className="text-xl font-semibold mb-2">The Key Difference</p>
           <p className="text-text-secondary leading-relaxed">
-            Deploy Assurance doesn't trust the CLI's own status report. It independently queries RPC
-            and P-Chain state, then diffs it against what the CLI claimed. If they disagree, you
-            know immediately — with actionable fixes, not just a red X.
+            Deploy Assurance doesn&apos;t trust the CLI&apos;s own status report — it never reads the
+            CLI&apos;s local state at all. It independently queries live RPC and P-Chain data directly. If
+            something isn&apos;t reachable, it says so honestly instead of guessing.
           </p>
         </motion.div>
       </div>

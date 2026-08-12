@@ -1,5 +1,6 @@
 # Avalanche Deploy Assurance
 
+[![Live site](https://img.shields.io/badge/live-aegis--psi--dun.vercel.app-9E1B32)](https://aegis-psi-dun.vercel.app/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](./backend/package.json)
 [![Backend unit tests](https://img.shields.io/badge/backend%20unit%20tests-51%20passing-brightgreen)](./backend)
@@ -32,10 +33,10 @@ node dist/cli/index.js verify --network fuji --node-id <NodeID>
 
 ## This is a monorepo
 
-Two things live here together, not as separate repos:
+Two things live here together — an npm workspace (`backend` is a workspace member of the root `package.json`), not separate repos:
 
 - **`backend/`** — the real verification engine (this README's main subject below): six checks, a health score, a CLI, and a JSON API. Node/TypeScript, not a Go binary — see [Known gaps](#known-gaps) for why some older design docs say otherwise.
-- **`src/`** — the Next.js marketing/docs site (Tech Stack / Getting Started / Project Structure for *this* part are further down, under [The frontend](#the-frontend)).
+- **`src/`** — the Next.js marketing/docs site (Tech Stack / Getting Started / Project Structure for *this* part are further down, under [The frontend](#the-frontend)). Its `src/app/api/verify/` routes import `backend/dist/` directly, which is how one `npm run build` and one Vercel deploy serve both.
 
 ## Architecture
 
@@ -74,14 +75,15 @@ flowchart TB
 
 P-Chain reads go through [`@avalabs/avalanchejs`](https://www.npmjs.com/package/@avalabs/avalanchejs)'s `PVMApi`; Info/Health/Admin/chain-RPC calls use raw `fetch`-based JSON-RPC (that SDK doesn't wrap those APIs). Any check that can't reach what it needs returns `unavailable` — it never fabricates a `pass`.
 
-## Status: this is real, working, and live-tested
+## Status: this is real, working, live-tested, and deployed
 
-Everything in `backend/` is implemented, not planned:
+Everything in `backend/` is implemented, not planned, and the live site actually calls it:
 
+- **Live at [aegis-psi-dun.vercel.app](https://aegis-psi-dun.vercel.app/)** — frontend and backend deployed together on Vercel via `src/app/api/verify/` (Next.js API routes that import backend's compiled `dist/` output directly, no separate host, no CORS).
 - **51 unit tests pass** (`npm test` inside `backend/` — fast, mocked, no network).
 - **4 integration tests pass against real Fuji testnet infrastructure right now** (`npm run test:integration`) — genesis consistency and validator registration are verified against live P-Chain and C-Chain data, not fixtures.
-- Typecheck and build are clean.
-- The frontend (`src/`) is built and deployable, but **is not yet wired to the live backend** — its "six checks" section (`src/lib/checks.ts`) is static copy, and its check names don't match the real backend's check IDs (see [Known gaps](#known-gaps)). The homepage's interactive dashboard is a simulated demo, not a live call to `backend`'s `/verify` API.
+- Typecheck and build are clean, including the full `npm run build` (backend build → Next.js build) Vercel actually runs.
+- **The homepage's "See It Live" demo calls the real backend** — `GET /api/verify/demo` looks up a currently-connected Fuji validator live (not a hardcoded NodeID) and runs all six checks against it plus Fuji C-Chain's genesis and RPC. Not a simulation; two of the six checks honestly show `unavailable` there since a public demo has no AvalancheGo node of its own to point at (see [Known gaps](#known-gaps)).
 
 ## The six checks
 
@@ -210,21 +212,24 @@ CLI and API share the exact same `verify()` function so their output can never d
 ## Repository structure
 
 ```
-avalanche-deploy-assurance-website/   # this repo
-├── src/                              # Next.js frontend — see "The frontend" below
-├── backend/                          # the real verification engine
+avalanche-deploy-assurance-website/   # this repo, npm workspaces monorepo
+├── src/                               # Next.js frontend — see "The frontend" below
+│   └── app/api/verify/                # calls backend/dist/ directly — see "Architecture" above
+├── backend/                           # the real verification engine, an npm workspace package
 │   ├── src/
-│   │   ├── checks/                   # the six checks
+│   │   ├── checks/                    # the six checks
 │   │   ├── score/computeHealthScore.ts
-│   │   ├── api/server.ts             # Fastify JSON API
-│   │   ├── cli/index.ts              # commander CLI
-│   │   ├── lib/avalancheRpc.ts       # shared RPC helpers
-│   │   ├── types/                    # CheckTarget/CheckResult + avalanchejs ambient types
-│   │   └── verify.ts                 # shared orchestrator (CLI + API both call this)
-│   ├── test/                         # unit (mocked) + integration (live Fuji)
-│   └── README.md                     # backend-specific documentation
-├── .github/workflows/                # includes aegis-verify.yml.example — CI gate template
-└── README.md                         # this file
+│   │   ├── api/server.ts              # Fastify JSON API (standalone; the deployed site uses the
+│   │   │                              #   Next.js API routes instead, not this server)
+│   │   ├── cli/index.ts               # commander CLI
+│   │   ├── lib/avalancheRpc.ts        # shared RPC helpers
+│   │   ├── types/                     # CheckTarget/CheckResult + avalanchejs ambient types
+│   │   └── verify.ts                  # shared orchestrator (CLI + both APIs call this)
+│   ├── dist/                          # compiled output — what the deployed site actually imports
+│   ├── test/                          # unit (mocked) + integration (live Fuji)
+│   └── README.md                      # backend-specific documentation
+├── .github/workflows/                 # includes aegis-verify.yml.example — CI gate template
+└── README.md                          # this file
 ```
 
 ## Testing the backend
@@ -244,11 +249,20 @@ npm run typecheck
 
 ## Known gaps
 
-Tracked honestly rather than silently left for someone to discover:
+Tracked honestly rather than silently left for someone to discover.
 
-- **Frontend isn't wired to the backend.** `src/lib/checks.ts` is static marketing copy, not a live call to `backend`'s `/verify`. Its check IDs and grouping (a `preflight`/`postdeploy` two-stage model) also don't match the real backend's flat six-check `verify()` run — e.g. the frontend's `vm-compat` is the backend's `version-compatibility`, `validator-set-verification` is `validator-registration`, `network-status-diff` is `network-state` (and doesn't actually diff against a CLI claim the way its copy describes).
-- **`/architecture` also has stale, Go-era copy**, discovered while capturing screenshots for this README: `Architecture.tsx` describes "cobra commands," a "CLI config parser," and "Pre-flight checks"/"Post-deploy checks" — none of which exist in the real backend (no `cobra`, no CLI-state parser, no staged commands). Not fixed as part of this round's `checks.ts`/`ChecksBreakdown.tsx` correction; a screenshot of this page was deliberately left out of this README since it would misrepresent the real system.
+**Fixed:**
+
+- ~~Frontend isn't wired to the backend~~ — `/api/verify` and `/api/verify/demo` (Next.js API routes) now call the real backend; the homepage demo shows real results.
+- ~~`src/lib/checks.ts` check names didn't match the backend~~ — corrected, and `/docs`'s tab copy relabeled honestly (grouped by what a check looks at, not a fake preflight/postdeploy stage split).
+- ~~`/architecture` had stale Go-era copy~~ ("cobra commands," a "CLI config parser," staged commands) — rewritten to describe the real four layers.
+- ~~`/solution` had fake `avalanche-deploy-assurance preflight`/`verify` commands and a "diffs against what the CLI claimed" claim~~ — rewritten to describe the real single `aegis verify` command and what it actually does (no CLI-claim diffing exists).
+- ~~`/roadmap` described a fictional unbuilt 10-week Go plan~~ (`doctor` command, binary releases, etc.) — replaced with actual project status; V2 items kept, since those actually are honestly-labeled future/evidence-gated aspirations, not claims about what exists today.
+
+**Still open:**
+
 - **Project naming is inconsistent.** The GitHub repo is `Aegis-`, the backend package is `@aegis/backend` with CLI binary `aegis`, but this file's own page title/metadata (`src/app/layout.tsx`) say "Avalanche Deploy Assurance," which is what this README uses. Not yet resolved which name is canonical.
+- **The public demo can't exercise every check.** `/api/verify/demo` has no AvalancheGo node of its own, so network-state's Health-API half, version compatibility, and config resolution always show `unavailable` there — correct behavior, not a bug, but worth knowing before assuming the live demo proves all six checks work (the backend's own live-Fuji integration tests cover more of them; see [Testing](#testing-the-backend)).
 - **14 of the 18 docs below haven't been individually re-verified against the real implementation.** `docs/03`, `04`, `06`, and `07` were rewritten to match the actual TypeScript backend (they previously described an unbuilt Go design) before being imported into this repo, along with `CONTRIBUTING.md`. The remaining 14 — whitepaper, milestones, competitive analysis, grant proposal, etc. — were imported as-is and may still contain assumptions from before the backend existed (e.g. `docs/10-mvp-scope.md`'s original 3+3 preflight/postdeploy check split, which doesn't match the real flat six-check design). Treat this README and `backend/README.md` as the source of truth for anything they contradict.
 
 ## Documentation
@@ -306,7 +320,8 @@ src/
 │   ├── features/page.tsx
 │   ├── architecture/page.tsx
 │   ├── docs/page.tsx
-│   └── roadmap/page.tsx
+│   ├── roadmap/page.tsx
+│   └── api/verify/       # calls the real backend — route.ts (generic) + demo/route.ts (homepage)
 └── components/
     ├── Navigation.tsx    # Sticky header
     ├── Footer.tsx        # Footer with links
@@ -315,7 +330,7 @@ src/
         ├── Problem.tsx        # The four GitHub issues above — /problem
         ├── Solution.tsx       # Before/after workflow comparison — /solution
         ├── Features.tsx       # Capability grid — /features
-        ├── Demo.tsx           # Interactive SIMULATED verification run — on homepage, not wired to backend/
+        ├── Demo.tsx           # Live verification run via /api/verify/demo — on homepage, real backend
         ├── Architecture.tsx   # Four-layer system design — /architecture
         ├── Roadmap.tsx        # Delivery timeline — /roadmap
         ├── OpenSource.tsx     # OSS commitments, how to contribute — /docs
@@ -367,7 +382,7 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full guide. For the verificat
 
 For the frontend: fork, branch, keep colors flowing through the CSS tokens in `globals.css` rather than hardcoding them in components, run `npm run lint` before opening a PR.
 
-Wiring the homepage's simulated demo up to the real backend and reconciling `src/lib/checks.ts`'s check names with the backend's actual check IDs (see [Known gaps](#known-gaps)) are open, well-scoped contributions.
+Resolving the project-naming inconsistency (see [Known gaps](#known-gaps)) is an open, well-scoped contribution.
 
 ## License
 

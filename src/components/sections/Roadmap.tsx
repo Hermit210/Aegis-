@@ -6,32 +6,43 @@ import { Check, Clock } from 'lucide-react'
 export default function Roadmap() {
   const milestones = [
     {
-      version: 'v0.1',
-      title: 'Pre-Flight',
-      week: 'Week 3',
-      status: 'internal',
-      items: ['rpcchainvm-compat', 'config-resolution', 'port-availability'],
-    },
-    {
-      version: 'v0.2',
-      title: 'Post-Deploy',
-      week: 'Week 6',
-      status: 'internal',
-      items: ['validator-set-diff', 'network-status-diff', 'genesis-consistency'],
-    },
-    {
-      version: 'v0.5',
-      title: 'Beta',
-      week: 'Week 7-8',
-      status: 'beta',
-      items: ['doctor command', 'JSON schema', 'health scoring', 'CI templates'],
-    },
-    {
-      version: 'v1.0',
-      title: 'Release',
-      week: 'Week 10',
+      version: 'Shipped',
+      title: 'The six checks',
+      week: 'Node/TypeScript',
       status: 'released',
-      items: ['Full docs', 'Builder Hub PR', 'Binary releases'],
+      items: [
+        'port-availability',
+        'validator-registration',
+        'genesis-consistency',
+        'network-state',
+        'version-compatibility',
+        'config-validation',
+      ],
+    },
+    {
+      version: 'Shipped',
+      title: 'Health score, CLI, API',
+      week: 'Live-tested',
+      status: 'released',
+      items: ['aegis verify CLI', 'Fastify JSON API', 'Weighted health score', '51 unit + 4 live-Fuji tests'],
+    },
+    {
+      version: 'Shipped',
+      title: 'Deployed',
+      week: 'This site',
+      status: 'released',
+      items: [
+        'Live on Vercel',
+        'Homepage demo calls the real backend',
+        'Real Fuji data, not a simulation',
+      ],
+    },
+    {
+      version: 'In progress',
+      title: 'Reconciling the marketing copy',
+      week: 'Ongoing',
+      status: 'beta',
+      items: ['Fixed: /docs, /architecture', 'Fixed: /solution', 'Open: project naming (Aegis vs. this name)'],
     },
   ]
 
@@ -46,9 +57,10 @@ export default function Roadmap() {
           transition={{ duration: 0.8 }}
           className="mb-16"
         >
-          <h2 className="text-5xl font-bold mb-4">10-Week Delivery</h2>
+          <h2 className="text-5xl font-bold mb-4">Project Status</h2>
           <p className="text-xl text-text-secondary max-w-2xl">
-            Evidence-driven roadmap. Each milestone scoped to real demand.
+            What&apos;s actually built and live today, not a projected timeline. V2 below is still
+            evidence-gated — scoped to real demand, not built yet.
           </p>
         </motion.div>
 
@@ -60,7 +72,7 @@ export default function Roadmap() {
           <div className="space-y-8 pl-20">
             {milestones.map((milestone, idx) => (
               <motion.div
-                key={milestone.version}
+                key={milestone.title}
                 initial={{ opacity: 0, x: -40 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}

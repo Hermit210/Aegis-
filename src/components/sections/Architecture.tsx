@@ -6,33 +6,33 @@ import { Database, Network, GitBranch, CheckCircle2 } from 'lucide-react'
 export default function Architecture() {
   const layers = [
     {
-      name: 'CLI Layer',
+      name: 'Entry points',
       icon: GitBranch,
-      items: ['cobra commands', 'Flag parsing', 'Error handling'],
+      items: ['aegis verify (commander CLI)', 'Fastify JSON API', 'Next.js API routes'],
       accent: 'border-l-primary',
       iconBg: 'bg-primary/10',
       iconColor: 'text-primary',
     },
     {
-      name: 'Checks Engine',
+      name: 'Checks engine',
       icon: CheckCircle2,
-      items: ['Pre-flight checks', 'Post-deploy checks', 'Result aggregation'],
+      items: ['Six checks, one flat pass', 'No preflight/postdeploy split', 'Result aggregation'],
       accent: 'border-l-secondary',
       iconBg: 'bg-secondary/10',
       iconColor: 'text-secondary',
     },
     {
-      name: 'State Readers',
+      name: 'State readers',
       icon: Database,
-      items: ['CLI config parser', 'RPC client', 'P-Chain client'],
+      items: ['P-Chain client (AvalancheJS)', 'Node Info/Health/Admin clients', 'Chain RPC client'],
       accent: 'border-l-highlight',
       iconBg: 'bg-highlight/10',
       iconColor: 'text-highlight',
     },
     {
-      name: 'Report Generator',
+      name: 'Report generator',
       icon: Network,
-      items: ['Health scoring', 'Text output', 'JSON output'],
+      items: ['Weighted health scoring', 'Text output', 'JSON output'],
       accent: 'border-l-primary',
       iconBg: 'bg-primary/10',
       iconColor: 'text-primary',
@@ -52,7 +52,8 @@ export default function Architecture() {
         >
           <h2 className="text-5xl font-bold mb-4">Simple, Extensible Architecture</h2>
           <p className="text-xl text-text-secondary max-w-2xl">
-            Four clean layers. Read-only. No CLI modification. Easy to add new checks.
+            Four clean layers, Node/TypeScript. Read-only — no CLI modification, and no local CLI state is
+            read either; every check queries live RPC/P-Chain/node APIs directly.
           </p>
         </motion.div>
 
@@ -131,15 +132,15 @@ export default function Architecture() {
           {[
             {
               title: 'Independent',
-              description: 'Never modifies CLI or chain state. Observes and queries only.',
+              description: 'Never modifies CLI or chain state, and never reads avalanche-cli’s local state either. Observes and queries live data only.',
             },
             {
               title: 'Extensible',
-              description: 'New checks are self-contained. No other files need to change.',
+              description: 'Adding a check means two files: register it, then give it a weight in the health-score calculation.',
             },
             {
               title: 'Testable',
-              description: 'Every check has fixture tests reproducing real GitHub issues.',
+              description: 'Every check has mocked unit tests, and the checks that can be, run against real live Fuji testnet data too.',
             },
           ].map((principle, idx) => (
             <motion.div
